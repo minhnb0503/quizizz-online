@@ -587,12 +587,10 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
                 const quizCount = globalDatabase[topic].length;
                 const randomColor = themeColors[idx % themeColors.length];
 
-                // Thiết lập Card Row
                 const sectionRow = document.createElement('div');
                 sectionRow.className = "space-y-3 bg-[#170a27]/50 border border-white/5 p-4 rounded-2xl topic-row-card animate__animated animate__fadeInUp";
                 sectionRow.setAttribute('data-topic-name', topic.toLowerCase());
                 
-                // Nội dung Tiêu đề
                 const titleDiv = document.createElement('div');
                 titleDiv.className = "flex items-center justify-between px-1";
                 titleDiv.innerHTML = `
@@ -603,11 +601,9 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
                 `;
                 sectionRow.appendChild(titleDiv);
 
-                // Thanh trượt ngang chứa các thẻ bài (Carousel)
                 const scrollWrapper = document.createElement('div');
                 scrollWrapper.className = "overflow-x-auto hide-scrollbar flex flex-row gap-4 py-1";
 
-                // Thẻ 1: Luyện tập trắc nghiệm
                 const card1 = document.createElement('div');
                 card1.className = "bg-[#1d0d33] border border-purple-500/10 rounded-xl p-4 min-w-[200px] max-w-[200px] flex flex-col justify-between items-start cursor-pointer hover:border-purple-500/40 transition-all active:scale-95 shrink-0 shadow-md";
                 card1.innerHTML = `
@@ -620,7 +616,6 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
                 `;
                 card1.addEventListener('click', () => startSinglePracticeRound(topic));
 
-                // Thẻ 2: Học Flashcard
                 const card2 = document.createElement('div');
                 card2.className = "bg-[#1d0d33] border border-cyan-500/10 rounded-xl p-4 min-w-[200px] max-w-[200px] flex flex-col justify-between items-start cursor-pointer hover:border-cyan-500/40 transition-all active:scale-95 shrink-0 shadow-md";
                 card2.innerHTML = `
@@ -633,7 +628,6 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
                 `;
                 card2.addEventListener('click', () => startFlashcardRound(topic));
 
-                // Thẻ 3: Mở phòng thi đấu mạng
                 const card3 = document.createElement('div');
                 card3.className = "bg-[#1d0d33] border border-pink-500/10 rounded-xl p-4 min-w-[200px] max-w-[200px] flex flex-col justify-between items-start cursor-pointer hover:border-pink-500/40 transition-all active:scale-95 shrink-0 shadow-md";
                 card3.innerHTML = `
@@ -646,7 +640,6 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
                 `;
                 card3.addEventListener('click', () => startMultiplayerHostSession(topic));
 
-                // Lắp ráp các khối thẻ bài học vào giao diện chính
                 scrollWrapper.appendChild(card1);
                 scrollWrapper.appendChild(card2);
                 scrollWrapper.appendChild(card3);
@@ -840,7 +833,6 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
         }
 
         let timerInterval = null;
-        let singleTimeLeft = 15;
         function runSingleTimerCore() {
             clearInterval(timerInterval);
             const totalMs = TIME_LIMIT_PER_QUESTION_SEC * 1000;
@@ -1177,17 +1169,10 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
 
         // BIÊN TẬP SỰ KIỆN QUA THAM CHIẾU BỘ NHỚ AN TOÀN TUYỆT ĐỐI (ZERO-FREEZE ENGINE)
         document.addEventListener("DOMContentLoaded", function() {
-            // Gán sự kiện cho Header Logo
             document.getElementById('nav-logo-home').addEventListener('click', backToDashboardHome);
-            
-            // Gán sự kiện mở Trình cài đặt đề
             document.getElementById('btn-go-to-setup').addEventListener('click', () => switchScreen('dashboard-screen', 'setup-screen'));
-            
-            // Gán sự kiện cho Trình cài đặt
             document.getElementById('btn-setup-cancel').addEventListener('click', backToDashboardHome);
             document.getElementById('btn-setup-save').addEventListener('click', processAndLoadDatabase);
-            
-            // Gán sự kiện phòng chờ và kết quả
             document.getElementById('btn-join-room-trigger').addEventListener('click', joinRoomAsPlayer);
             document.getElementById('btn-host-start').addEventListener('click', broadCastStartGame);
             document.getElementById('btn-lobby-exit').addEventListener('click', backToDashboardHome);
