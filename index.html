@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Quizizz Ultimate Arena - Wayground Live Edition</title>
+    <title>Quizizz Ultimate Arena - Wayground Production</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -17,27 +17,27 @@
     <style>
         body {
             font-family: 'Quicksand', sans-serif;
-            background: radial-gradient(circle at center, #230f3a 0%, #06020c 100%);
+            background: radial-gradient(circle at center, #2b134d 0%, #090314 100%);
             overflow-x: hidden;
-            /* Đệm an toàn bảo vệ giao diện tránh lẹm vào tai thỏ, viên thuốc Dynamic Island của Apple */
+            /* Thiết lập vùng đệm an toàn tự động co giãn tránh lẹm vào tai thỏ và Dynamic Island của iPhone */
             padding-top: env(safe-area-inset-top, 20px);
             padding-bottom: env(safe-area-inset-bottom, 20px);
             padding-left: env(safe-area-inset-left, 0px);
             padding-right: env(safe-area-inset-right, 0px);
-            min-height: 100dvh;
+            min-height: 100dvh; /* Chiều cao động triệt tiêu lỗi cuộn của trình duyệt di động */
             -webkit-tap-highlight-color: transparent;
             -webkit-user-select: none;
             user-select: none;
         }
         .quizizz-glass {
-            background: rgba(22, 11, 40, 0.7);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border: 2px solid rgba(255, 255, 255, 0.04);
-            box-shadow: 0 25px 65px rgba(0,0,0,0.65);
+            background: rgba(23, 11, 41, 0.65);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 2px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 30px 70px rgba(0,0,0,0.7);
         }
         .quizizz-input {
-            background-color: #150826 !important;
+            background-color: #1a0b30 !important;
             border: 2px solid rgba(111, 69, 155, 0.4) !important;
             transition: all 0.25s ease-in-out;
         }
@@ -47,14 +47,14 @@
         }
         .btn-quizizz-purple {
             background-color: #6F459B;
-            border-bottom: 4px solid #482c66;
+            border-bottom: 4px solid #4a2b6b;
             transition: all 0.15s ease-in-out;
         }
         .btn-quizizz-purple:hover {
             background-color: #8D66AF;
         }
         .btn-quizizz-purple:active {
-            background-color: #553378;
+            background-color: #56347A;
             transform: translateY(2px);
             border-bottom-width: 2px;
         }
@@ -71,23 +71,41 @@
         button {
             touch-action: manipulation;
         }
+        /* Phục vụ hoạt họa lật mặt Flashcard */
+        .flashcard-box {
+            perspective: 1000px;
+        }
+        .flashcard-inner {
+            transition: transform 0.4s ease-in-out;
+            transform-style: preserve-3d;
+        }
+        .flashcard-flipped {
+            transform: rotateY(180deg);
+        }
+        .flashcard-front, .flashcard-back {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        .flashcard-back {
+            transform: rotateY(180deg);
+        }
     </style>
 </head>
 <body class="text-white flex flex-col justify-start items-center p-3 sm:p-4">
 
-    <header class="w-full max-w-5xl flex items-center justify-between py-3 px-4 bg-[#160a27]/90 border-b border-white/5 backdrop-blur-md rounded-2xl mb-4 z-40">
+    <header class="w-full max-w-5xl flex items-center justify-between py-3 px-4 bg-[#170b29]/80 border-b border-white/5 backdrop-blur-md rounded-2xl mb-4 z-40">
         <div class="flex items-center gap-3">
             <span class="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-400 to-cyan-400 tracking-tight cursor-pointer" onclick="backToDashboardHome()">
                 WAYGROUND
             </span>
         </div>
         <div class="flex items-center gap-3">
-            <button onclick="toggleAudioMute()" id="mute-btn" class="bg-[#150826] border border-purple-900/50 w-9 h-9 rounded-xl flex items-center justify-center text-sm transition-all active:scale-90 shadow-inner">
+            <button onclick="toggleAudioMute()" id="mute-btn" class="bg-[#1a0b30] border border-purple-900/60 w-9 h-9 rounded-xl flex items-center justify-center text-sm transition-all active:scale-90 shadow-md">
                 🔊
             </button>
-            <div class="hidden sm:flex items-center bg-[#150826] border border-purple-500/10 px-4 py-1.5 rounded-full text-xs font-bold gap-2">
+            <div class="hidden sm:flex items-center bg-[#1a0b30] border border-purple-500/20 px-4 py-1.5 rounded-full text-xs font-bold gap-2">
                 <span class="text-yellow-400 text-sm">🥇</span>
-                <span class="text-gray-400">500 xu thưởng</span>
+                <span id="header-coins-text" class="text-gray-300">500 coins</span>
             </div>
         </div>
     </header>
@@ -97,24 +115,27 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
             <div class="md:col-span-2 quizizz-glass rounded-3xl p-4 sm:p-5 flex flex-col justify-center">
                 <div class="flex flex-col sm:flex-row gap-3 items-stretch w-full">
-                    <input type="text" id="input-room-code" placeholder="Nhập mã phòng 6 số chơi mạng..." class="flex-1 quizizz-input rounded-xl px-4 py-3.5 font-black text-base text-yellow-400 focus:outline-none text-center sm:text-left">
-                    <button onclick="joinRoomAsPlayer()" class="bg-pink-600 border-b-4 border-pink-800 hover:bg-pink-500 py-3.5 px-6 rounded-xl font-extrabold text-sm sm:text-base transition-all active:scale-95 text-center shrink-0">
-                        Tham Gia Phòng Đấu 👥
+                    <input type="text" id="input-room-code" placeholder="Nhập mã phòng 6 số chơi mạng..." class="flex-1 quizizz-input rounded-xl px-4 py-3.5 font-black text-lg text-yellow-400 focus:outline-none text-center sm:text-left">
+                    <button onclick="joinRoomAsPlayer()" class="bg-pink-600 border-b-4 border-pink-800 hover:bg-pink-500 py-3.5 px-6 rounded-xl font-extrabold text-base transition-all active:scale-95 text-center shrink-0">
+                        Tham Gia Phòng 🎮
                     </button>
                 </div>
             </div>
             <div class="quizizz-glass rounded-3xl p-4 flex items-center justify-center">
-                <button onclick="switchScreen('dashboard-screen', 'setup-screen')" class="w-full btn-quizizz-purple py-4 px-4 rounded-2xl font-extrabold text-sm sm:text-base tracking-wide flex items-center justify-center gap-2 shadow-lg">
-                    ⚙️ QUẢN LÝ / NẠP FILE ĐỀ AI
+                <button onclick="switchScreen('dashboard-screen', 'setup-screen')" class="w-full btn-quizizz-purple py-4 px-4 rounded-2xl font-extrabold text-sm sm:text-base tracking-wide flex items-center justify-center gap-2">
+                    🛠️ QUẢN LÝ / NẠP FILE ĐỀ
                 </button>
             </div>
         </div>
 
         <div class="space-y-4">
-            <h2 class="text-sm font-black text-purple-300 uppercase tracking-widest flex items-center gap-2 px-1">
-                <span>📚 Thư viện danh mục ôn tập</span>
-                <span class="text-[10px] bg-purple-950 px-2 py-0.5 rounded-full text-purple-400 border border-purple-900/40 lowercase" id="topic-count-badge">0 chủ đề</span>
-            </h2>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-1">
+                <h2 class="text-sm font-black text-purple-300 uppercase tracking-widest flex items-center gap-2">
+                    <span>📚 Thư viện danh mục ôn tập</span>
+                    <span class="text-[10px] bg-purple-950 px-2 py-0.5 rounded-full text-purple-400 border border-purple-900/40" id="topic-count-badge">0 chủ đề</span>
+                </h2>
+                <input type="text" id="search-topic-input" oninput="filterDashboardTopics()" placeholder="🔍 Tìm kiếm nhanh chủ đề học tập..." class="bg-[#1a0b30] border border-purple-900/40 rounded-xl px-3 py-1.5 text-xs text-purple-300 focus:outline-none focus:border-purple-500 max-w-xs w-full">
+            </div>
             
             <div id="dynamic-topics-zone" class="space-y-5">
                 </div>
@@ -122,80 +143,77 @@
     </main>
 
     <div id="setup-screen" class="w-full max-w-2xl quizizz-glass rounded-3xl p-4 sm:p-7 hidden animate__animated animate__fadeIn">
-        <h2 class="text-xl sm:text-2xl font-black text-cyan-400 mb-4 text-center uppercase tracking-wider">HỆ THỐNG NẠP CÂU HỎI KHOAHOC</h2>
+        <h2 class="text-xl sm:text-2xl font-black text-cyan-400 mb-4 text-center uppercase tracking-wider">HỆ THỐNG QUẢN LÝ FILE ĐỀ THI</h2>
         <div class="space-y-4">
             
-            <div class="bg-slate-950/80 border border-purple-900/40 rounded-2xl p-3.5 sm:p-4 shadow-inner">
+            <div class="bg-slate-950/90 border border-purple-900/40 rounded-2xl p-4 shadow-inner">
                 <div class="flex items-center justify-between border-b border-purple-950 pb-2 mb-2">
                     <span class="text-xs font-extrabold text-purple-400 tracking-wide uppercase flex items-center gap-1">
-                        🤖 Trợ lý biên soạn dữ liệu cấu trúc qua Gemini
+                        🤖 Trợ lý bóc tách đề đa danh mục qua Gemini
                     </span>
                     <button onclick="copyAiPromptToClipboard()" id="copy-prompt-btn" class="bg-purple-950 hover:bg-purple-900 border border-purple-700 text-purple-300 font-extrabold text-[10px] sm:text-xs px-3 py-1.5 rounded-xl transition-all active:scale-90 shadow-md">
                         📋 Sao chép lệnh AI
                     </button>
                 </div>
-                <p class="text-[11px] sm:text-xs text-gray-400 leading-relaxed italic bg-black/20 p-2.5 rounded-xl border border-slate-900/40">
+                <p class="text-[11px] sm:text-xs text-gray-400 leading-relaxed italic bg-black/30 p-2.5 rounded-xl border border-slate-900/40">
                     "Hãy biên soạn bộ đề thi trắc nghiệm gồm nhiều câu hỏi. Bạn có thể chia làm nhiều chủ đề khác nhau, mỗi câu viết trên 1 dòng duy nhất phân tách bằng dấu |. Định dạng chuẩn: <span class="text-cyan-400 font-bold not-italic">Tên chủ đề | Câu hỏi | Đáp án 1 | Đáp án 2 | Đáp án 3 | Đáp án 4 | Số của đáp án đúng (1-4)</span>. Không thêm số thứ tự câu ở đầu dòng."
                 </p>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1 tracking-widest">Biệt danh chơi mạng:</label>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1 tracking-widest">Biệt danh của bạn:</label>
                     <input type="text" id="player-nickname" value="Người_Ôn_Tập" class="w-full quizizz-input rounded-xl px-4 py-2.5 font-bold text-sm focus:outline-none">
                 </div>
                 <div class="flex items-center justify-between bg-purple-950/20 border border-purple-900/30 rounded-xl p-3">
-                    <span class="text-xs sm:text-sm font-bold text-purple-300">🔀 Trộn ngẫu nhiên đề:</span>
+                    <span class="text-xs sm:text-sm font-bold text-purple-300">🔀 Tự động trộn xáo đề:</span>
                     <input type="checkbox" id="shuffle-toggle" checked class="w-5 h-5 accent-cyan-400 cursor-pointer">
                 </div>
             </div>
-            
+
             <div>
-                <label class="block text-xs font-bold text-gray-400 uppercase mb-1 tracking-widest">Dán chuỗi văn bản dữ liệu hàng loạt vào đây:</label>
-                <textarea id="bulk-input" rows="6" class="w-full quizizz-input rounded-xl p-3 text-xs sm:text-sm font-mono focus:outline-none">Xác suất | Tung một đồng xu cân đối 2 lần. Xác suất để cả 2 lần xuất hiện mặt ngửa là? | 1/2 | 1/4 | 3/4 | 1 | 2
-Xác suất | Một hộp có 3 bi đỏ và 2 bi xanh. Lấy ngẫu nhiên 1 bi, xác suất lấy được bi đỏ là? | 1/5 | 2/5 | 3/5 | 1/2 | 3
-Hình học | Tổng các góc trong của một tứ giác lồi bất kỳ bằng bao nhiêu độ? | 180 độ | 270 độ | 360 độ | 540 độ | 3
-Hình học | Hình tam giác đều có góc ở các đỉnh bằng bao nhiêu độ? | 45 độ | 60 độ | 90 độ | 120 độ | 2
-Số phức | Số phức z = 3 - 4i có phần ảo bằng bao nhiêu? | 3 | 4 | -4 | -4i | 3
-Số phức | Môđun của số phức z = 1 + i bằng bao nhiêu? | 1 | 2 | Căn bậc hai của 2 | 0 | 3
-KienlongBank | Ngân hàng TMCP Kiên Long (KienlongBank) chính thức thành lập vào năm nào? | 1995 | 1998 | 2000 | 2005 | 1</textarea>
+                <label class="block text-xs font-bold text-gray-400 uppercase mb-1 tracking-widest">Dán nội dung tệp đề đa chủ đề vào đây:</label>
+                <textarea id="bulk-input" rows="6" class="w-full quizizz-input rounded-xl p-3 text-xs sm:text-sm font-mono focus:outline-none" placeholder="Dán nội dung đề phân tách dấu | vào đây...">Confidence Intervals | Khoảng tin cậy cho một trung bình tổng thể được sử dụng nhằm mục đích gì? | Ước lượng giá trị tham số tổng thể chưa biết | Kiểm định tính độc lập của biến | Tìm phương sai của mẫu khảo sát | Xác định độ lệch chuẩn chuẩn xác | 1
+Confidence Intervals | Khi kích thước mẫu tăng lên và độ tin cậy giữ nguyên, độ rộng khoảng tin cậy sẽ biến đổi như thế nào? | Tăng lên đáng kể | Thu hẹp lại | Giữ nguyên cố định | Biến thiên ngẫu nhiên | 2
+Rational Functions | Tiệm cận đứng của đồ thị hàm số phân thức y = (2x + 1) / (x - 3) là đường thẳng nào? | x = 3 | y = 2 | x = -3 | y = -3 | 1
+Rational Functions | Tiệm cận ngang của đồ thị hàm số phân thức y = (3x - 5) / (x + 2) là đường thẳng nào? | y = -2 | x = -2 | y = 3 | x = 3 | 3
+Probability | Bỏ một đồng xu cân đối và đồng chất liên tiếp 2 lần. Xác suất để cả hai lần xuất hiện mặt ngửa là? | 1/2 | 1/4 | 3/4 | 1 | 2
+Probability | Trong một hộp có chứa 3 viên bi đỏ và 2 viên bi xanh. Lấy ngẫu nhiên một viên, xác suất lấy được bi đỏ là? | 1/5 | 2/5 | 3/5 | 1/2 | 3
+Geometry | Tổng các góc bên trong của một tứ giác lồi bất kỳ luôn bằng bao nhiêu độ? | 180 độ | 270 độ | 360 độ | 540 độ | 3
+Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích vô hướng của chúng bằng bao nhiêu? | 1 | -1 | 0 | Hai vector cùng độ dài | 3</textarea>
             </div>
 
             <div class="grid grid-cols-3 gap-3 pt-1">
                 <button onclick="switchScreen('setup-screen', 'dashboard-screen')" class="col-span-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 py-3.5 rounded-xl font-bold text-xs uppercase active:scale-95 transition-all">
-                    🏠 Hủy Bỏ
+                    🏠 Quay Lại
                 </button>
                 <button onclick="processAndLoadDatabase()" class="col-span-2 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:brightness-110 py-3.5 rounded-xl font-black text-sm sm:text-base tracking-widest uppercase shadow-lg active:scale-95 transition-all">
-                    LƯU & CẬP NHẬT KHO ĐỀ ⚡
+                    NẠP ĐỀ & LƯU KHO VĨNH VIỄN ⚡
                 </button>
             </div>
         </div>
     </div>
 
     <div id="lobby-screen" class="w-full max-w-md quizizz-glass rounded-3xl p-6 text-center hidden animate__animated animate__fadeIn">
-        <div class="bg-purple-950/70 border border-purple-900/50 rounded-2xl p-4 mb-5">
-            <span class="text-xs text-gray-400 block uppercase font-bold tracking-widest">MÃ PHÒNG THI ĐẤU</span>
+        <div class="bg-purple-950/70 border border-purple-900/50 rounded-2xl p-4 mb-6">
+            <span class="text-xs text-gray-400 block uppercase font-bold tracking-widest">MÃ PHÒNG GỬI BẠN BÈ</span>
             <div id="display-room-code" class="text-4xl font-black text-yellow-400 tracking-widest my-1">000000</div>
-            <p class="text-[11px] text-purple-300">Chia sẻ mã này để mọi người gõ vào bảng điều khiển cùng tham gia phòng!</p>
         </div>
-        
         <div class="text-left mb-6">
-            <h3 class="text-xs font-bold text-gray-400 uppercase mb-3 tracking-wide">Sĩ số phòng chờ (<span id="player-count">1</span>):</h3>
+            <h3 class="text-sm font-bold text-gray-300 uppercase mb-3">Thành viên phòng chờ (<span id="player-count">1</span>):</h3>
             <div id="lobby-player-list" class="space-y-2 max-h-48 overflow-y-auto pr-1"></div>
         </div>
-
         <div id="host-action-zone" class="hidden">
-            <button onclick="broadCastStartGame()" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 py-4 rounded-xl font-black text-base uppercase tracking-wide shadow-md active:scale-95 transition-all">
-                KHỞI CHẠY TRẬN ĐẤU 🔥
+            <button onclick="broadCastStartGame()" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 py-4 rounded-xl font-black text-lg uppercase active:scale-95 transition-all">
+                BẮT ĐẦU TRẬN ĐẤU 🔥
             </button>
         </div>
-        <div id="player-action-zone" class="text-xs text-purple-300 animate__animated animate__pulse animate__infinite hidden mb-4 font-bold">
-            ⏳ Đang đợi chủ phòng bấm nút phát lệnh xuất phát...
+        <div id="player-action-zone" class="text-sm text-gray-400 animate__animated animate__pulse animate__infinite hidden mb-4">
+            ⏳ Đang chờ chủ phòng bấm nút phát lệnh xuất phát...
         </div>
-
         <div class="mt-4 pt-4 border-t border-purple-950">
-            <button onclick="backToDashboardHome()" class="w-full bg-slate-950 hover:text-red-400 text-gray-500 font-bold py-2.5 rounded-xl text-xs transition-all">
-                🏃‍♂️ Hủy liên kết / Thoát phòng chờ
+            <button onclick="backToDashboardHome()" class="w-full bg-slate-950 text-gray-500 font-bold py-2 rounded-xl text-xs transition-all">
+                🏃‍♂️ Hủy kết nối / Quay về trang chủ
             </button>
         </div>
     </div>
@@ -203,10 +221,9 @@ KienlongBank | Ngân hàng TMCP Kiên Long (KienlongBank) chính thức thành l
     <div id="game-screen" class="w-full max-w-5xl hidden animate__animated animate__fadeIn">
         <div class="flex flex-col lg:grid lg:grid-cols-4 gap-4 sm:gap-6">
             
-            <div class="lg:col-span-3 quizizz-glass rounded-2xl sm:rounded-3xl p-4 sm:p-6 flex flex-col justify-between min-h-[66dvh] lg:min-h-[560px] relative overflow-hidden">
-                
+            <div class="lg:col-span-3 quizizz-glass rounded-2xl sm:rounded-3xl p-4 sm:p-6 flex flex-col justify-between min-h-[68dvh] lg:min-h-[550px] relative overflow-hidden">
                 <div class="flex justify-between items-center gap-2 sm:gap-4 mb-2">
-                    <div class="bg-purple-950/80 px-3 py-1.5 rounded-xl border border-purple-900/60 text-[10px] sm:text-xs font-bold uppercase shrink-0">
+                    <div class="bg-purple-950/80 px-2.5 py-1.5 rounded-xl border border-purple-900/60 text-[10px] sm:text-xs font-bold uppercase shrink-0">
                         Câu: <span id="current-question-idx" class="text-cyan-400">1/1</span>
                     </div>
                     <div class="flex-1 bg-slate-950 h-2.5 rounded-full overflow-hidden p-[1px]">
@@ -216,7 +233,6 @@ KienlongBank | Ngân hàng TMCP Kiên Long (KienlongBank) chính thức thành l
                         <span class="streak-fire text-xs">🔥</span>
                         <span id="streak-count" class="font-black text-yellow-400 text-[10px]">STREAK X0</span>
                     </div>
-                    
                     <div class="flex items-center gap-1.5 shrink-0">
                         <button id="pause-btn" onclick="togglePauseGame()" class="bg-purple-900/60 hover:bg-purple-800 border border-purple-700/60 px-2.5 py-1.5 rounded-xl text-[10px] font-black text-purple-200 transition-all active:scale-90 hidden">
                             ⏸ Tạm dừng
@@ -227,7 +243,7 @@ KienlongBank | Ngân hàng TMCP Kiên Long (KienlongBank) chính thức thành l
                     </div>
                 </div>
 
-                <div class="text-center my-4 sm:my-8 min-h-[110px] flex items-center justify-center px-2">
+                <div class="text-center my-4 sm:my-8 min-h-[100px] flex items-center justify-center px-2">
                     <h2 id="question-text" class="text-lg sm:text-2xl lg:text-3xl font-extrabold leading-snug sm:leading-relaxed text-white drop-shadow-md animate__animated">
                         Nội dung câu hỏi?
                     </h2>
@@ -252,74 +268,117 @@ KienlongBank | Ngân hàng TMCP Kiên Long (KienlongBank) chính thức thành l
                     </button>
                 </div>
 
-                <div id="meme-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-[#06020d]/90 z-50 hidden">
+                <div id="meme-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-[#07020d]/90 z-50 hidden">
                     <div id="meme-box" class="quizizz-glass rounded-2xl p-6 text-center border-4 max-w-xs w-5/6 animate__animated">
                         <div id="meme-emoji" class="text-5xl sm:text-6xl mb-2">😎</div>
                         <h3 id="meme-title" class="text-xl sm:text-2xl font-black mb-1 uppercase tracking-wider">CHÍNH XÁC</h3>
                         <p id="meme-subtitle" class="text-yellow-400 font-bold text-sm sm:text-base">+0 Điểm</p>
-                        <p id="meme-wait-text" class="text-[10px] text-gray-500 mt-3 animate__animated animate__flash animate__infinite">Đang đồng bộ kết quả phòng chơi mạng...</p>
+                        <p id="meme-wait-text" class="text-[10px] text-gray-500 mt-3 animate__animated animate__flash animate__infinite">Đang đồng bộ phòng thi đấu mạng...</p>
                     </div>
                 </div>
 
-                <div id="pause-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-[#06020c]/95 z-[60] hidden">
+                <div id="pause-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-[#0c0414]/95 z-[60] hidden">
                     <div class="quizizz-glass rounded-2xl p-6 text-center border-4 border-purple-500 max-w-xs w-5/6 animate__animated animate__bounceIn">
                         <div class="text-5xl mb-2">⏸️</div>
                         <h3 class="text-xl font-black mb-2 text-purple-400 uppercase tracking-wider">ĐÃ TẠM DỪNG</h3>
-                        <p class="text-xs text-gray-400 mb-6">Trục đếm ngược đã đóng băng an toàn. Hãy nghỉ tay suy nghĩ nhé!</p>
+                        <p class="text-xs text-gray-400 mb-6">Trục đếm ngược đã đóng băng an toàn. Hãy nghỉ tay một chút nhé!</p>
                         <div class="space-y-3">
                             <button onclick="togglePauseGame()" class="w-full btn-quizizz-purple py-3 rounded-xl font-black text-sm uppercase shadow-md">
-                                ▶️ Tiếp Tục Làm Bài
+                                ▶️ Tiếp tục ôn tập
                             </button>
                             <button onclick="backToDashboardHome()" class="w-full bg-slate-900 border border-slate-800 py-2.5 rounded-xl font-bold text-xs text-red-400 uppercase transition-all">
-                                🏠 Rời Trận Về Home
+                                🏠 Rời trận về trang chủ
                             </button>
                         </div>
                     </div>
                 </div>
-
             </div>
 
-            <div class="quizizz-glass rounded-2xl sm:rounded-3xl p-4 flex flex-col justify-between lg:min-h-[560px]">
+            <div class="quizizz-glass rounded-2xl sm:rounded-3xl p-4 flex flex-col justify-between lg:min-h-[550px]">
                 <div class="w-full">
                     <div id="panel-multi-title" class="hidden">
                         <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-purple-900/60 pb-2 mb-3 flex items-center justify-between">
                             <span>BẢNG XẾP HẠNG</span>
                             <span class="text-[10px] text-emerald-400 font-bold flex items-center gap-1">LIVE <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span></span>
                         </h3>
-                        <div id="leaderboard-container" class="space-y-2 max-h-44 lg:max-h-none overflow-y-auto pr-0.5"></div>
+                        <div id="leaderboard-container" class="space-y-2 max-h-40 lg:max-h-none overflow-y-auto pr-0.5"></div>
                     </div>
                     
                     <div id="panel-single-title" class="hidden">
                         <h3 class="text-xs font-bold text-cyan-400 uppercase tracking-widest border-b border-cyan-900/60 pb-2 mb-3">
-                            📊 THỐNG KÊ LƯỢT ÔN TẬP
+                            📊 THỐNG KÊ KẾT QUẢ
                         </h3>
                         <div class="space-y-2.5 font-bold text-xs text-gray-200">
                             <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-900 flex justify-between items-center">
-                                <span>Tiến hành</span>
-                                <div id="single-progress-text" class="text-cyan-400 font-black">Câu 0/0</div>
+                                <span class="text-gray-400 uppercase text-[10px]">Tiến hành</span>
+                                <div id="single-progress-text" class="font-black text-cyan-400">Câu 0/0</div>
                             </div>
                             <div class="grid grid-cols-2 gap-2">
                                 <div class="bg-emerald-950/20 border border-emerald-900/40 p-2 rounded-xl text-center">
-                                    <span class="text-emerald-400 block uppercase text-[10px]">Đúng</span>
-                                    <span id="single-right-count" class="text-lg font-black text-emerald-400">0</span>
+                                    <span class="text-emerald-400 text-[10px] block uppercase">Đúng</span>
+                                    <span id="single-right-count" class="text-xl font-black text-emerald-400">0</span>
                                 </div>
                                 <div class="bg-red-950/20 border border-red-900/40 p-2 rounded-xl text-center">
-                                    <span class="text-red-400 block uppercase text-[10px]">Sai</span>
-                                    <span id="single-wrong-count" class="text-lg font-black text-red-400">0</span>
+                                    <span class="text-red-400 text-[10px] block uppercase">Sai</span>
+                                    <span id="single-wrong-count" class="text-xl font-black text-red-400">0</span>
                                 </div>
                             </div>
                             <div class="bg-slate-950/60 p-2 rounded-xl border border-slate-900 flex justify-between items-center px-4">
-                                <span>Độ chính xác</span>
-                                <div id="single-accuracy-text" class="text-lg font-black text-yellow-400">0%</div>
+                                <span class="text-gray-400 uppercase text-[10px]">Độ chính xác</span>
+                                <div id="single-accuracy-text" class="text-xl font-black text-yellow-400">0%</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-[#19092e] border-2 border-purple-900/40 rounded-xl p-4 text-center mt-3 shadow-inner">
+                <div class="bg-[#1b0c30] border-2 border-purple-900/40 rounded-xl p-4 text-center mt-3 shadow-inner">
                     <div class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">ĐIỂM CỦA BẠN</div>
                     <div id="my-score-footer" class="text-4xl font-black text-yellow-400 mt-0.5">0</div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="flashcard-screen" class="w-full max-w-xl hidden animate__animated animate__fadeIn">
+        <div class="quizizz-glass rounded-3xl p-5 flex flex-col justify-between min-h-[480px]">
+            
+            <div class="flex justify-between items-center border-b border-white/5 pb-3">
+                <span class="text-xs bg-cyan-950 text-cyan-400 border border-cyan-800/60 px-3 py-1 rounded-xl font-bold uppercase tracking-wider">
+                    Thẻ nhớ: <span id="flashcard-idx-txt">1/1</span>
+                </span>
+                <button onclick="backToDashboardHome()" class="text-xs font-bold text-gray-400 hover:text-white transition-all bg-slate-950 px-3 py-1.5 rounded-xl border border-white/5">
+                    🏠 Về Home
+                </button>
+            </div>
+
+            <div class="flashcard-box w-full my-8 cursor-pointer flex-1 flex items-stretch" onclick="rotateFlashcardCore()">
+                <div id="flashcard-trigger-inner" class="flashcard-inner w-full relative quizizz-input rounded-2xl border-4 border-purple-900/40 p-6 flex items-center justify-center text-center shadow-2xl">
+                    
+                    <div class="flashcard-front absolute inset-0 p-6 flex flex-col justify-between items-center">
+                        <div class="text-[10px] text-purple-400 tracking-widest font-black uppercase">❓ MẶT TRƯỚC (CÂU HỎI)</div>
+                        <p id="flashcard-q-text" class="text-lg sm:text-xl font-extrabold leading-relaxed text-white max-h-[250px] overflow-y-auto hide-scrollbar">Nội dung câu hỏi?</p>
+                        <div class="text-[10px] text-gray-500 animate__animated animate__flash animate__infinite">👉 Chạm vào thẻ để lật xem đáp án</div>
+                    </div>
+
+                    <div class="flashcard-back absolute inset-0 p-6 flex flex-col justify-between items-center bg-emerald-950/40 border border-emerald-500/20 rounded-xl">
+                        <div class="text-[10px] text-emerald-400 tracking-widest font-black uppercase">💡 MẶT SAU (ĐÁP ÁN ĐÚNG)</div>
+                        <div class="w-full flex-1 flex items-center justify-center">
+                            <p id="flashcard-a-text" class="text-xl sm:text-2xl font-black text-emerald-400 drop-shadow-md">Nội dung đáp án chuẩn</p>
+                        </div>
+                        <div class="text-[10px] text-emerald-500/60">Ghi nhớ kiến thức và bấm Tiếp theo bên dưới 👇</div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 mt-auto">
+                <div class="text-left flex flex-col justify-center pl-1 font-bold text-xs text-gray-400">
+                    <span>Nhấp thẻ để kiểm tra</span>
+                    <span>phản xạ của não bộ</span>
+                </div>
+                <button onclick="nextFlashcardSequence(event)" class="bg-gradient-to-r from-cyan-500 to-blue-600 py-3.5 px-4 rounded-xl font-black text-sm uppercase tracking-wider active:scale-95 transition-all shadow-md text-center">
+                    CÂU TIẾP THEO ➡️
+                </button>
             </div>
 
         </div>
@@ -329,7 +388,7 @@ KienlongBank | Ngân hàng TMCP Kiên Long (KienlongBank) chính thức thành l
         <span class="text-4xl block mb-2">🏁</span>
         <h1 class="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-amber-500 mb-4 uppercase">KẾT THÚC LƯỢT CHƠI</h1>
         
-        <div class="bg-slate-950/80 border border-purple-900 rounded-2xl p-4 my-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-left text-sm">
+        <div class="bg-slate-950/80 border border-purple-900 rounded-2xl p-4 sm:p-5 my-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-left text-sm">
             <div>
                 <span class="text-xs text-gray-400 uppercase font-bold block">Kết quả chung cuộc</span>
                 <div id="final-rank-txt" class="text-3xl font-black text-cyan-400 my-1">HOÀN THÀNH</div>
@@ -346,8 +405,7 @@ KienlongBank | Ngân hàng TMCP Kiên Long (KienlongBank) chính thức thành l
             <h3 class="text-xs sm:text-sm font-black text-rose-400 uppercase tracking-wider mb-2 flex items-center gap-1">
                 ⚠️ Báo cáo lỗi sai kiến thức (Cần ôn lại):
             </h3>
-            <div id="mistake-list-container" class="space-y-3 max-h-56 overflow-y-auto pr-1 hide-scrollbar">
-                </div>
+            <div id="mistake-list-container" class="space-y-3 max-h-56 overflow-y-auto pr-1 hide-scrollbar"></div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
@@ -355,40 +413,34 @@ KienlongBank | Ngân hàng TMCP Kiên Long (KienlongBank) chính thức thành l
                 🏠 Về bảng điều khiển
             </button>
             <button onclick="window.location.reload()" class="w-full bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 hover:brightness-110 py-3 rounded-xl font-black uppercase text-xs shadow-md transition-all active:scale-95">
-                🔄 Làm lượt chơi mới
+                🔄 Ôn luyện tệp đề mới
             </button>
         </div>
     </div>
 
     <script>
-        // Cấu hình hằng số thời gian mặc định của hệ thống
+        // Hệ thống cấu hình hằng số thời gian mặc định
         const TIME_LIMIT_PER_QUESTION_SEC = 15;
         const SHOW_ANSWER_WINDOW_SEC = 4;
 
-        // Quản lý trạng thái ứng dụng
-        let gameMode = 'single'; 
+        let gameMode = 'single'; // 'single', 'multi', hoặc 'flashcard'
         let client = null;
         let roomCode = "";
         let isHost = false;
         let myName = "Người_Ôn_Tập";
         let audioMuted = false;
         let isPaused = false; 
+        let isFlashcardFlipped = false;
 
-        let globalDatabase = {}; // Kho chứa dữ liệu bóc tách đa chủ đề
-        let questions = [];      // Mảng câu hỏi của trận hiện tại
-        let currentIdx = 0;
-        let playerScore = 0;
-        let currentStreak = 0;
-        let correctAnswersCount = 0;
-        let wrongAnswersCount = 0;
-        let canAnswer = false;   
+        let globalDatabase = {}; // CSDL lưu trữ đa danh mục đề thi
+        let questions = [];      // Mảng lưu câu hỏi của phiên chạy hiện tại
+        let currentIdx = 0;      let playerScore = 0;    let currentStreak = 0;
+        let correctAnswersCount = 0;                     let wrongAnswersCount = 0;
+        let canAnswer = false;   let currentElapsedMs = 0; let singleTimeLeft = 15;
         
-        let currentElapsedMs = 0; 
-        let singleTimeLeft = 15;
         let wrongQuestionsLog = [];
         let networkPlayers = {};
 
-        // Khởi tạo đối tượng âm thanh rỗng nhằm chống bẫy chặn tự động phát của iOS Safari
         let audioCtx = null;
 
         function ensureAudioContextInitialized() {
@@ -400,7 +452,6 @@ KienlongBank | Ngân hàng TMCP Kiên Long (KienlongBank) chính thức thành l
             }
         }
 
-        // TỰ ĐỘNG PHÁT THUẬT TOÁN ÂM THANH CHIPTUNE SẠCH SẼ KHÔNG LO CHẾT LINK
         function playSound(type) {
             if (audioMuted) return;
             ensureAudioContextInitialized();
@@ -412,15 +463,15 @@ KienlongBank | Ngân hàng TMCP Kiên Long (KienlongBank) chính thức thành l
             
             if (type === 'good') {
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // Node C5
-                osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.08); // Node G5
-                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.25);
+                osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); 
+                osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.08); 
+                gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.23);
             } else if (type === 'bad') {
                 osc.type = 'triangle';
-                osc.frequency.setValueAtTime(261.63, audioCtx.currentTime); // Node C4
-                osc.frequency.setValueAtTime(196.00, audioCtx.currentTime + 0.12); // Node G3
-                gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(261.63, audioCtx.currentTime); 
+                osc.frequency.setValueAtTime(196.00, audioCtx.currentTime + 0.12); 
+                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
                 osc.start(); osc.stop(audioCtx.currentTime + 0.25);
             }
         }
@@ -438,7 +489,6 @@ KienlongBank | Ngân hàng TMCP Kiên Long (KienlongBank) chính thức thành l
 
         function copyAiPromptToClipboard() {
             const promptText = `Hãy biên soạn cho tôi một bộ đề gồm nhiều câu trắc nghiệm thuộc các lĩnh vực khác nhau. Mỗi câu hỏi nằm trên một dòng duy nhất, không có số thứ tự câu ở đầu dòng, phân tách các cột bằng dấu gạch đứng "|". Định dạng chính xác từng dòng: Tên chủ đề | Câu hỏi | Đáp án 1 | Đáp án 2 | Đáp án 3 | Đáp án 4 | Số đáp án đúng (từ 1 đến 4). Ví dụ: Mathematics | Hình tam giác có tổng ba góc bằng bao nhiêu độ? | 90 độ | 180 độ | 360 độ | 60 độ | 2`;
-            
             navigator.clipboard.writeText(promptText).then(() => {
                 const btn = document.getElementById('copy-prompt-btn');
                 btn.innerText = "✓ Đã sao chép! 📋";
@@ -447,13 +497,12 @@ KienlongBank | Ngân hàng TMCP Kiên Long (KienlongBank) chính thức thành l
         }
 
         // ========================================================
-        // PHẦN 1: BỘ GIẢI MÃ VÀ PHÂN LOẠI CHỦ ĐỀ KHOAHOC TỰ ĐỘNG
+        // PHẦN 1 & LOCAL STORAGE VĨNH VIỄN: BỘ GIẢI MÃ DỮ LIỆU FILE ĐỀ
         // ========================================================
         function processAndLoadDatabase() {
             const rawText = document.getElementById('bulk-input').value;
-            if (!rawText.trim()) { alert("Chuỗi nạp đề không được để trống."); return; }
+            if (!rawText.trim()) { alert("Chuỗi dữ liệu nạp đề không được trống."); return; }
 
-            // Giải mã an toàn, loại bỏ triệt để ký tự \r ẩn khi copy từ Microsoft Excel
             const lines = rawText.replace(/\r/g, '').split('\n');
             globalDatabase = {}; 
 
@@ -481,12 +530,16 @@ KienlongBank | Ngân hàng TMCP Kiên Long (KienlongBank) chính thức thành l
                 }
             });
 
+            // Ghi vào bộ nhớ vĩnh viễn LocalStorage của trình duyệt máy tính/iPhone
+            localStorage.setItem('wayground_ultimate_db', JSON.stringify(globalDatabase));
+            localStorage.setItem('wayground_raw_input', rawText);
+
             renderDashboardTopics();
             switchScreen('setup-screen', 'dashboard-screen');
         }
 
         // ========================================================
-        // PHẦN 2: KẾT XUẤT DANH MỤC ROW/CARDS RA DASHBOARD CHUẨN
+        // PHẦN 2: KẾT XUẤT DANH MỤC ROW CHỦ ĐỀ CHUẨN WAYGROUND
         // ========================================================
         function renderDashboardTopics() {
             const container = document.getElementById('dynamic-topics-zone');
@@ -494,7 +547,7 @@ KienlongBank | Ngân hàng TMCP Kiên Long (KienlongBank) chính thức thành l
             document.getElementById('topic-count-badge').innerText = `${topics.length} chủ đề`;
 
             if (topics.length === 0) {
-                container.innerHTML = `<div class="text-center text-gray-500 py-8 text-xs font-bold">Chưa có dữ liệu chủ đề nào được nạp. Hãy bấm nút Cài Đặt ở góc phải để nạp đề thi mới.</div>`;
+                container.innerHTML = `<div class="text-center text-gray-500 py-12 text-xs font-bold">Chưa có dữ liệu chủ đề nào được nạp vào máy.<br><br>👉 Bạn hãy bấm nút "QUẢN LÝ / NẠP FILE ĐỀ" để cập nhật kho câu hỏi ôn tập nhé!</div>`;
                 return;
             }
 
@@ -506,7 +559,9 @@ KienlongBank | Ngân hàng TMCP Kiên Long (KienlongBank) chính thức thành l
                 const randomColor = themeColors[idx % themeColors.length];
 
                 const sectionRow = document.createElement('div');
-                sectionRow.className = "space-y-3 bg-[#170a27]/50 border border-white/5 p-4 rounded-2xl animate__animated animate__fadeInUp";
+                sectionRow.className = "space-y-3 bg-[#170a27]/50 border border-white/5 p-4 rounded-2xl topic-row-card animate__animated animate__fadeInUp";
+                sectionRow.setAttribute('data-topic-name', topic.toLowerCase());
+                
                 sectionRow.innerHTML = `
                     <div class="flex items-center justify-between px-1">
                         <span class="font-extrabold text-xs sm:text-sm uppercase text-purple-300 tracking-wider flex items-center gap-2">
@@ -515,20 +570,28 @@ KienlongBank | Ngân hàng TMCP Kiên Long (KienlongBank) chính thức thành l
                         </span>
                     </div>
                     <div class="overflow-x-auto hide-scrollbar flex flex-row gap-4 py-1">
-                        <div onclick="startSinglePracticeRound('${topic}')" class="bg-[#1d0d33] border border-purple-500/10 rounded-xl p-4 min-w-[210px] max-w-[210px] flex flex-col justify-between items-start cursor-pointer hover:border-purple-500/40 transition-all active:scale-95 shrink-0 shadow-md">
+                        <div onclick="startSinglePracticeRound('${topic}')" class="bg-[#1d0d33] border border-purple-500/10 rounded-xl p-4 min-w-[200px] max-w-[200px] flex flex-col justify-between items-start cursor-pointer hover:border-purple-500/40 transition-all active:scale-95 shrink-0 shadow-md">
                             <div class="w-10 h-10 rounded-xl ${randomColor} flex items-center justify-center text-white/70 text-lg font-bold mb-4 shadow-inner">📝</div>
                             <div class="w-full">
-                                <div class="text-[11px] text-cyan-400 font-bold uppercase tracking-wider mb-0.5">${quizCount} Câu hỏi</div>
+                                <div class="text-[10px] text-cyan-400 font-bold uppercase tracking-wider mb-0.5">${quizCount} Câu hỏi</div>
                                 <h4 class="font-black text-sm text-white truncate w-full">Luyện tập tổng hợp</h4>
-                                <p class="text-[10px] text-gray-500 mt-2">Tốc độ cao, chuyển câu không chờ</p>
+                                <p class="text-[10px] text-gray-500 mt-2">Chạy thần tốc không chờ</p>
                             </div>
                         </div>
-                        <div onclick="startMultiplayerHostSession('${topic}')" class="bg-[#1d0d33] border border-pink-500/10 rounded-xl p-4 min-w-[210px] max-w-[210px] flex flex-col justify-between items-start cursor-pointer hover:border-pink-500/40 transition-all active:scale-95 shrink-0 shadow-md">
+                        <div onclick="startFlashcardRound('${topic}')" class="bg-[#1d0d33] border border-cyan-500/10 rounded-xl p-4 min-w-[200px] max-w-[200px] flex flex-col justify-between items-start cursor-pointer hover:border-cyan-500/40 transition-all active:scale-95 shrink-0 shadow-md">
+                            <div class="w-10 h-10 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center text-white/70 text-lg font-bold mb-4 shadow-inner">🎴</div>
+                            <div class="w-full">
+                                <div class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider mb-0.5">Active Recall</div>
+                                <h4 class="font-black text-sm text-white truncate w-full">Học thẻ Flashcard</h4>
+                                <p class="text-[10px] text-gray-500 mt-2">Lật mặt ghi nhớ kiến thức</p>
+                            </div>
+                        </div>
+                        <div onclick="startMultiplayerHostSession('${topic}')" class="bg-[#1d0d33] border border-pink-500/10 rounded-xl p-4 min-w-[200px] max-w-[200px] flex flex-col justify-between items-start cursor-pointer hover:border-pink-500/40 transition-all active:scale-95 shrink-0 shadow-md">
                             <div class="w-10 h-10 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 flex items-center justify-center text-white/70 text-lg font-bold mb-4 shadow-inner">👑</div>
                             <div class="w-full">
-                                <div class="text-[11px] text-pink-400 font-bold uppercase tracking-wider mb-0.5">Realtime Room</div>
-                                <h4 class="font-black text-sm text-white truncate w-full">Tạo Phòng Đấu Mạng</h4>
-                                <p class="text-[10px] text-gray-500 mt-2">Mở phòng thi đấu cùng bạn bè</p>
+                                <div class="text-[10px] text-pink-400 font-bold uppercase tracking-wider mb-0.5">Realtime Room</div>
+                                <h4 class="font-black text-sm text-white truncate w-full">Mở Phòng Đấu Mạng</h4>
+                                <p class="text-[10px] text-gray-500 mt-2">Thi đấu mạng cùng bạn bè</p>
                             </div>
                         </div>
                     </div>
@@ -537,17 +600,27 @@ KienlongBank | Ngân hàng TMCP Kiên Long (KienlongBank) chính thức thành l
             });
         }
 
+        // BỘ LỌC TÌM KIẾM THEO CHỮ GÕ NHANH
+        function filterDashboardTopics() {
+            const val = document.getElementById('search-topic-input').value.toLowerCase().trim();
+            const rows = document.querySelectorAll('.topic-row-card');
+            rows.forEach(row => {
+                const name = row.getAttribute('data-topic-name');
+                if (name.includes(val)) { row.classList.remove('hidden'); }
+                else { row.classList.add('hidden'); }
+            });
+        }
+
         // ========================================================
-        // PHẦN 3: LOGIC TRÌNH CHƠI GAME (SINGLE VÀ MULTIPLAYER AGENT)
+        // PHẦN 3: LOGIC TRÌNH CHƠI GAME ĐƠN VÀ THI ĐẤU MULTIPLAYER
         // ========================================================
         
-        // KÍCH HOẠT ÔN TẬP 1 MÌNH (CHẾ ĐỘ CON CỦA PHẦN 3)
+        // NHÁNH CHƠI 1: ÔN TẬP ĐƠN (SINGLE PRACTICE)
         function startSinglePracticeRound(topicName) {
             gameMode = 'single'; isHost = false;
             let rawQuestions = globalDatabase[topicName];
             questions = JSON.parse(JSON.stringify(rawQuestions));
 
-            // Tráo đề thông minh nâng cao
             if (document.getElementById('shuffle-toggle').checked) {
                 shuffleArray(questions);
                 questions.forEach(q => {
@@ -557,7 +630,6 @@ KienlongBank | Ngân hàng TMCP Kiên Long (KienlongBank) chính thức thành l
                 });
             }
 
-            // Dọn dẹp bộ nhớ đệm
             currentIdx = 0; playerScore = 0; currentStreak = 0;
             correctAnswersCount = 0; wrongAnswersCount = 0; wrongQuestionsLog = [];
             isPaused = false;
@@ -572,17 +644,55 @@ KienlongBank | Ngân hàng TMCP Kiên Long (KienlongBank) chính thức thành l
             executeNewGameplayRound(0);
         }
 
-        // KÍCH HOẠT LÀM HOST PHÒNG ĐẤU MẠNG
+        // NHÁNH CHƠI 2: KHỞI CHẠY KHU VỰC HỌC THẺ FLASHCARD
+        function startFlashcardRound(topicName) {
+            gameMode = 'flashcard'; isHost = false;
+            let rawQuestions = globalDatabase[topicName];
+            questions = JSON.parse(JSON.stringify(rawQuestions));
+            
+            // Tự động xáo trộn để đảo vị trí học
+            shuffleArray(questions);
+            currentIdx = 0;
+            isFlashcardFlipped = false;
+
+            document.getElementById('flashcard-trigger-inner').classList.remove('flashcard-flipped');
+            switchScreen('dashboard-screen', 'flashcard-screen');
+            renderCurrentFlashcardData();
+        }
+
+        function renderCurrentFlashcardData() {
+            isFlashcardFlipped = false;
+            document.getElementById('flashcard-trigger-inner').classList.remove('flashcard-flipped');
+            document.getElementById('flashcard-idx-txt').innerText = `${currentIdx + 1}/${questions.length}`;
+            
+            const curQ = questions[currentIdx];
+            document.getElementById('flashcard-q-text').innerText = curQ.question;
+            document.getElementById('flashcard-a-text').innerText = curQ.options[curQ.correct];
+        }
+
+        function rotateFlashcardCore() {
+            isFlashcardFlipped = !isFlashcardFlipped;
+            const target = document.getElementById('flashcard-trigger-inner');
+            if (isFlashcardFlipped) { target.classList.add('flashcard-flipped'); playSound('good'); }
+            else { target.classList.remove('flashcard-flipped'); }
+        }
+
+        function nextFlashcardSequence(event) {
+            if(event) event.stopPropagation(); // Ngăn chặn sự kiện nổi bọt lật ngược thẻ
+            currentIdx++;
+            if (currentIdx < questions.length) { renderCurrentFlashcardData(); }
+            else { alert("🎉 Chúc mừng bạn! Bạn đã hoàn thành việc lật thẻ ghi nhớ toàn bộ kho từ vựng/công thức của chủ đề này rồi!"); backToDashboardHome(); }
+        }
+
+        // NHÁNH CHƠI 3: KÍCH HOẠT PHÒNG MULTIPLAYER HOST MẠNG
         function startMultiplayerHostSession(topicName) {
             gameMode = 'multi'; isHost = true;
             let rawQuestions = globalDatabase[topicName];
             questions = JSON.parse(JSON.stringify(rawQuestions));
-            
-            // Ép buộc tráo đề đấu mạng để chống quay cóp
             shuffleArray(questions);
 
             const nick = document.getElementById('player-nickname').value.trim();
-            myName = nick || "Trưởng Phòng";
+            myName = nick || "Chủ_Phòng";
 
             roomCode = Math.floor(100000 + Math.random() * 900000).toString();
             document.getElementById('display-room-code').innerText = roomCode;
@@ -596,9 +706,9 @@ KienlongBank | Ngân hàng TMCP Kiên Long (KienlongBank) chính thức thành l
             });
         }
 
-        // LÀM MỚI VÀ ĐỔ DỮ LIỆU CÂU HỎI RA LAYOUT
+        // LÀM MỚI VÀ ĐỔ DỮ LIỆU CÂU HỎI RA LAYOUT ARENA
         function executeNewGameplayRound(idx) {
-            clearInterval(timerInterval); // Chốt chặn khóa rò rỉ bộ đếm thời gian
+            clearInterval(timerInterval); 
             currentIdx = idx; canAnswer = true; isPaused = false;
             
             document.getElementById('meme-overlay').classList.add('hidden');
@@ -611,7 +721,6 @@ KienlongBank | Ngân hàng TMCP Kiên Long (KienlongBank) chính thức thành l
             const textEl = document.getElementById('question-text');
             textEl.innerText = curQ.question;
             
-            // Hoạt họa chuyển chữ trượt mịn cao cấp
             textEl.classList.remove('animate__fadeInDown');
             void textEl.offsetWidth;
             textEl.classList.add('animate__fadeInDown');
@@ -628,7 +737,6 @@ KienlongBank | Ngân hàng TMCP Kiên Long (KienlongBank) chính thức thành l
             else if (isHost) { runHostTimerCore(); }
         }
 
-        // TIMING CORE CHO TỰ ÔN LUYỆN ĐƠN
         let timerInterval = null;
         function runSingleTimerCore() {
             clearInterval(timerInterval);
@@ -650,23 +758,18 @@ KienlongBank | Ngân hàng TMCP Kiên Long (KienlongBank) chính thức thành l
 
         function updateTimerBarUI(elapsed, totalMs) {
             let pct = 100 - (elapsed / totalMs) * 100; if (pct < 0) pct = 0;
-            document.getElementById('timer-bar').style.width = `${pct}%`;
+            const element = document.getElementById('timer-bar');
+            if(element) element.style.width = `${pct}%`;
         }
 
         function togglePauseGame() {
             if (gameMode !== 'single' || !canAnswer) return;
             isPaused = !isPaused;
             const overlay = document.getElementById('pause-overlay');
-            if (isPaused) { 
-                clearInterval(timerInterval); 
-                overlay.classList.remove('hidden'); 
-            } else { 
-                overlay.classList.add('hidden'); 
-                runSingleTimerCore(); 
-            }
+            if (isPaused) { clearInterval(timerInterval); overlay.classList.remove('hidden'); }
+            else { overlay.classList.add('hidden'); runSingleTimerCore(); }
         }
 
-        // XỬ LÝ CLICK CHỌN ĐÁP ÁN
         function handleOptionClick(chosenIdx) {
             if (!canAnswer || isPaused) return; canAnswer = false;
             clearInterval(timerInterval);
@@ -693,7 +796,6 @@ KienlongBank | Ngân hàng TMCP Kiên Long (KienlongBank) chính thức thành l
                 document.getElementById('streak-container').style.opacity = "1"; playSound('good');
             } else {
                 currentStreak = 0; wrongAnswersCount++; document.getElementById('streak-container').style.opacity = "0"; playSound('bad');
-                // Nạp câu sai vào mảng nhật ký phục vụ ôn tập vá lỗi
                 wrongQuestionsLog.push({ 
                     question: curQ.question, 
                     yourChoose: curQ.options[chosenIdx] || "Trống", 
@@ -706,8 +808,7 @@ KienlongBank | Ngân hàng TMCP Kiên Long (KienlongBank) chính thức thành l
                 showInstantMemeFeedback(isCorrect, pts);
             } else {
                 showInstantMemeFeedback(isCorrect, pts);
-                // ÔN TẬP ĐƠN: Vút bay qua câu kế tiếp sau 0.6 giây, đạt độ nhạy tối đa
-                setTimeout(jumpToNextRoundSequence, 600);
+                setTimeout(jumpToNextRoundSequence, 600); // 0.6s chuyển câu không delay chết
             }
         }
 
@@ -715,7 +816,7 @@ KienlongBank | Ngân hàng TMCP Kiên Long (KienlongBank) chính thức thành l
             canAnswer = false; currentStreak = 0; wrongAnswersCount++;
             document.getElementById('streak-container').style.opacity = "0"; playSound('bad');
             const curQ = questions[currentIdx];
-            wrongQuestionsLog.push({ question: curQ.question, yourChoose: "Bỏ cuộc / Hết giờ ⏰", correctAnswer: curQ.options[curQ.correct] });
+            wrongQuestionsLog.push({ question: curQ.question, yourChoose: "Hết thời gian suy nghĩ ⏰", correctAnswer: curQ.options[curQ.correct] });
             
             showInstantMemeFeedback(false, 0, true);
             setTimeout(jumpToNextRoundSequence, 800);
@@ -755,7 +856,6 @@ KienlongBank | Ngân hàng TMCP Kiên Long (KienlongBank) chính thức thành l
             overlay.classList.remove('hidden');
         }
 
-        // KẾT THÚC LƯỢT CHƠI: HIỂN THỊ BÁO CÁO VÀ KHO VÁ LỖ HỔNG KIẾN THỨC
         function showFinalPerformanceSummary() {
             clearInterval(timerInterval); clearInterval(hostTimerInterval);
             document.getElementById('game-screen').classList.add('hidden');
@@ -779,7 +879,7 @@ KienlongBank | Ngân hàng TMCP Kiên Long (KienlongBank) chính thức thành l
                         <div class="p-3 bg-red-950/20 border border-red-900/30 rounded-xl text-xs space-y-1 animate__animated animate__fadeInUp">
                             <div class="font-extrabold text-gray-200 text-sm">❓ ${log.question}</div>
                             <div class="text-red-400">❌ Lựa chọn của bạn: <span class="font-bold">${log.yourChoose}</span></div>
-                            <div class="text-emerald-400">💡 Đáp án đúng chuẩn: <span class="font-bold">${log.correctAnswer}</span></div>
+                            <div class="text-emerald-400">💡 Đáp án chuẩn xác: <span class="font-bold">${log.correctAnswer}</span></div>
                         </div>
                     `;
                 });
@@ -787,14 +887,14 @@ KienlongBank | Ngân hàng TMCP Kiên Long (KienlongBank) chính thức thành l
         }
 
         // ========================================================
-        // PHẦN MẠNG MULTIPLAYER ROOM (KẾT NỐI REALTIME)
+        // PHẦN MẠNG REALTIME ROOM: KẾT NỐI QUA PORT 8884
         // ========================================================
         function joinRoomAsPlayer() {
             roomCode = document.getElementById('input-room-code').value.trim();
             const nick = document.getElementById('player-nickname').value.trim();
-            myName = nick || "Thành_Viên_" + Math.floor(Math.random()*100);
+            myName = nick || "Thành_Viên_Mới";
 
-            if (roomCode.length !== 6) { alert('Mã phòng đấu mạng phải gồm đúng 6 số.'); return; }
+            if (roomCode.length !== 6) { alert('Mã số phòng chơi mạng phải gồm đúng 6 chữ số.'); return; }
             gameMode = 'multi'; isHost = false;
             
             document.getElementById('display-room-code').innerText = roomCode;
@@ -810,19 +910,13 @@ KienlongBank | Ngân hàng TMCP Kiên Long (KienlongBank) chính thức thành l
 
         function initializeNetworkBroker(cb) {
             const id = "client_" + Math.random().toString(36).substring(5);
-            // Thiết lập cổng bảo mật WSS cùng chỉ định định tuyến an toàn /mqtt vượt tường lửa
             client = new Paho.MQTT.Client("broker.hivemq.com", Number(8884), "/mqtt", id);
             client.onMessageArrived = handleNetMessage;
             
             client.connect({ 
-                useSSL: true, 
-                timeout: 5, 
-                onSuccess: () => { 
-                    client.subscribe("quizizz_multiplayer_room_" + roomCode); cb(); 
-                }, 
-                onFailure: () => { 
-                    alert("Tường lửa Wi-Fi chặn cổng thời gian thực! Hãy bật 4G trên iPhone để kết nối đấu mạng."); 
-                } 
+                useSSL: true, timeout: 5, 
+                onSuccess: () => { client.subscribe("quizizz_multiplayer_room_" + roomCode); cb(); }, 
+                onFailure: () => { alert("Tường lửa chặn kết nối! Hãy bật 4G trên iPhone để trải nghiệm đấu mạng mượt mà."); } 
             });
         }
 
@@ -857,10 +951,7 @@ KienlongBank | Ngân hàng TMCP Kiên Long (KienlongBank) chính thức thành l
                     break;
                 case 'HOST_TICK_TIMER': if (!isHost) updateTimerBarUI(data.msElapsed, data.totalMs); break;
                 case 'HOST_FORCE_END_ROUND':
-                    if (canAnswer) { 
-                        canAnswer = false; currentStreak = 0; wrongAnswersCount++; playSound('bad'); 
-                        showInstantMemeFeedback(false, 0, true); 
-                    }
+                    if (canAnswer) { canAnswer = false; currentStreak = 0; wrongAnswersCount++; playSound('bad'); showInstantMemeFeedback(false, 0, true); }
                     showCorrectAnswerMultiplayerVisual(data.correctIndex);
                     break;
                 case 'HOST_NEXT_ROUND': executeNewGameplayRound(data.nextIdx); break;
@@ -871,7 +962,7 @@ KienlongBank | Ngân hàng TMCP Kiên Long (KienlongBank) chính thức thành l
         function updateLobbyUI() {
             const container = document.getElementById('lobby-player-list'); container.innerHTML = '';
             const names = Object.keys(networkPlayers); document.getElementById('player-count').innerText = names.length;
-            names.forEach(n => { container.innerHTML += `<div class="p-3 bg-white/5 border border-white/10 rounded-xl font-bold flex justify-between text-xs animate__animated animate__fadeInLeft"><span>👤 ${n}</span><span class="text-emerald-400">Sẵn sàng ✓</span></div>`; });
+            names.forEach(n => { container.innerHTML += `<div class="p-3 bg-white/5 border border-white/10 rounded-xl font-bold flex justify-between text-xs"><span>👤 ${n}</span><span class="text-emerald-400">Sẵn sàng ✓</span></div>`; });
         }
 
         function broadCastStartGame() { sendNetworkMessage({ type: 'START_GAME' }); }
@@ -890,7 +981,7 @@ KienlongBank | Ngân hàng TMCP Kiên Long (KienlongBank) chính thức thành l
                     clearInterval(hostTimerInterval);
                     sendNetworkMessage({ type: 'HOST_FORCE_END_ROUND', correctIndex: questions[currentIdx].correct });
                     
-                    // Đồng bộ thời gian chờ hiển thị đáp án 4 giây chuẩn xác
+                    // Cơ chế tạo cửa sổ 4 giây ngắm đáp án đồng bộ toàn phòng
                     setTimeout(() => {
                         if (currentIdx + 1 < questions.length) sendNetworkMessage({ type: 'HOST_NEXT_ROUND', nextIdx: currentIdx + 1 });
                         else sendNetworkMessage({ type: 'HOST_END_GAME' });
@@ -932,15 +1023,40 @@ KienlongBank | Ngân hàng TMCP Kiên Long (KienlongBank) chính thức thành l
         function backToDashboardHome() {
             clearInterval(timerInterval); clearInterval(hostTimerInterval);
             if (client && client.isConnected()) { try { client.disconnect(); } catch(e){} }
-            ['mode-screen', 'multi-choice-screen', 'setup-screen', 'player-join-screen', 'lobby-screen', 'game-screen', 'result-screen'].forEach(id => { document.getElementById(id).classList.add('hidden'); });
+            ['mode-screen', 'multi-choice-screen', 'setup-screen', 'player-join-screen', 'lobby-screen', 'game-screen', 'flashcard-screen', 'result-screen'].forEach(id => { document.getElementById(id).classList.add('hidden'); });
             document.getElementById('dashboard-screen').classList.remove('hidden');
+        }
+
+        function parseBulkInput(text) {
+            if (!text) return []; const lines = text.replace(/\r/g, '').split('\n'); const res = [];
+            lines.forEach(line => {
+                const trimmed = line.trim(); if (!trimmed) return;
+                let spl = trimmed.includes('\t') ? '\t' : '|'; const tokens = trimmed.split(spl).map(i => i.trim());
+                if (tokens.length >= 7) {
+                    const ansIdx = parseInt(tokens[6]) - 1;
+                    if (!isNaN(ansIdx) && ansIdx >= 0 && ansIdx <= 3 && tokens[1].length > 0) {
+                        res.push({ question: tokens[1], options: [tokens[2], tokens[3], tokens[4], tokens[5]], correct: ansIdx });
+                    }
+                }
+            });
+            return res;
         }
 
         function shuffleArray(arr) { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } }
 
-        // TỰ ĐỘNG KHỞI CHẠY NẠP KHO DỮ LIỆU BAN ĐẦU NGAY KHI LÊN SÓNG
+        // CƠ CHẾ KHỞI CHẠY KHÔI PHỤC KHO DỮ LIỆU TỪ LOCAL STORAGE KHI BẬT MÁY
         window.onload = function() {
-            processAndLoadDatabase();
+            const savedDb = localStorage.getItem('wayground_ultimate_db');
+            const savedRaw = localStorage.getItem('wayground_raw_input');
+            
+            if (savedDb && savedRaw) {
+                globalDatabase = JSON.parse(savedDb);
+                document.getElementById('bulk-input').value = savedRaw;
+                renderDashboardTopics();
+            } else {
+                // Nếu máy trống, tự động kích hoạt nạp kho đề mẫu có sẵn
+                processAndLoadDatabase();
+            }
         };
     </script>
 </body>
