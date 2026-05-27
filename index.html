@@ -1182,6 +1182,19 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
             document.getElementById('btn-flashcard-next').addEventListener('click', nextFlashcardSequence);
             document.getElementById('btn-result-home').addEventListener('click', backToDashboardHome);
             document.getElementById('btn-result-reload').addEventListener('click', () => window.location.reload());
+            document.getElementById('mute-btn').addEventListener('click', toggleAudioMute);
+            
+            // KÍCH HOẠT SỰ KIỆN CHẠM LẬT THẺ CHUẨN XÁC V6.2
+            document.getElementById('flashcard-trigger-inner').addEventListener('click', rotateFlashcardCore);
+
+            // GÁN LỆNH CHO THANH TÌM KIẾM PC VÀ MOBILE
+            document.getElementById('search-topic-input').addEventListener('input', filterDashboardTopics);
+            document.getElementById('search-topic-input-mobile').addEventListener('input', filterDashboardTopicsMobile);
+
+            // GÁN LỆNH CHO 4 Ô ĐÁP ÁN TRẮC NGHIỆM CHUẨN LAYOUT
+            for (let i = 0; i < 4; i++) {
+                document.getElementById(`opt-${i}`).addEventListener('click', () => handleOptionClick(i));
+            }
 
             try {
                 const savedDb = localStorage.getItem('wayground_ultimate_db');
