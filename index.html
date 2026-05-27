@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Quizizz Ultimate Mobile & Desktop Arena</title>
+    <title>Quizizz Ultimate ArenaPro</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Quizizz Ultimate">
+    <meta name="apple-mobile-web-app-title" content="Quizizz Pro">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
@@ -17,27 +17,28 @@
     <style>
         body {
             font-family: 'Quicksand', sans-serif;
-            background: radial-gradient(circle at center, #250b3e 0%, #07020d 100%);
+            background: radial-gradient(circle at center, #1e0933 0%, #05010a 100%);
             overflow-x: hidden;
-            /* Tối ưu bảo vệ nội dung tránh tai thỏ (Notch) và Dynamic Island trên dòng iPhone mới */
             padding-top: env(safe-area-inset-top, 20px);
             padding-bottom: env(safe-area-inset-bottom, 20px);
             padding-left: env(safe-area-inset-left, 0px);
             padding-right: env(safe-area-inset-right, 0px);
-            min-height: 100dvh; /* Dynamic view-height triệt tiêu bug cuộn của Safari iOS */
-            -webkit-tap-highlight-color: transparent; /* Tắt vệt bóng mờ màu xám khi chạm trên iPhone */
+            min-height: 100dvh;
+            -webkit-tap-highlight-color: transparent;
+            /* Khóa chọn văn bản hệ thống để tạo cảm giác mượt mà như app native trên iPhone */
+            -webkit-user-select: none;
+            user-select: none;
         }
         .quizizz-glass {
-            background: rgba(255, 255, 255, 0.04);
+            background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
-            border: 2px solid rgba(255, 255, 255, 0.07);
-            box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+            border: 2px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.65);
         }
         .streak-fire {
             text-shadow: 0 0 12px #ff4500, 0 0 24px #ff8c00;
         }
-        /* Loại bỏ độ trễ phản hồi lực chạm bấm (Delay click) trên iOS */
         button {
             touch-action: manipulation;
         }
@@ -87,14 +88,14 @@
             <div class="bg-slate-950/80 border border-cyan-500/30 rounded-2xl p-3.5 shadow-inner">
                 <div class="flex items-center justify-between border-b border-cyan-950 pb-2 mb-2">
                     <span class="text-xs font-extrabold text-cyan-400 tracking-wide uppercase flex items-center gap-1">
-                        🤖 Trợ lý tạo đề nhanh qua Gemini / ChatGPT
+                        🤖 Trợ lý tạo đề nhanh qua Gemini
                     </span>
-                    <button onclick="copyAiPromptToClipboard()" id="copy-prompt-btn" class="bg-cyan-950 hover:bg-cyan-900 border border-cyan-700 text-cyan-300 font-extrabold text-[10px] sm:text-xs px-2.5 py-1 rounded-lg transition-all active:scale-90">
+                    <button onclick="copyAiPromptToClipboard()" id="copy-prompt-btn" class="bg-cyan-950 hover:bg-cyan-900 border border-cyan-700 text-cyan-300 font-extrabold text-[10px] sm:text-xs px-2.5 py-1 rounded-lg transition-all shortcut-touch active:scale-90">
                         📋 Sao chép lệnh AI
                     </button>
                 </div>
-                <p class="text-[11px] sm:text-xs text-gray-400 leading-relaxed italic bg-black/20 p-2.5 rounded-xl border border-slate-900/40">
-                    "Hãy biên soạn bộ đề gồm 15 câu trắc nghiệm kiến thức về chủ đề: <span class="text-yellow-400 font-bold not-italic">[Nhập chủ đề của bạn vào đây]</span>. Yêu cầu trả về văn bản thô, mỗi câu trên 1 dòng duy nhất, không có số thứ tự câu ở đầu dòng, phân tách các phần bằng dấu |. Định dạng: Câu hỏi | Đáp án 1 | Đáp án 2 | Đáp án 3 | Đáp án 4 | Số đáp án đúng (1-4)"
+                <p class="text-[11px] sm:text-xs text-gray-400 leading-relaxed italic bg-black/20 p-2.5 rounded-xl border border-slate-900/40>">
+                    "Hãy biên soạn bộ đề gồm 15 câu trắc nghiệm kiến thức về chủ đề: <span class="text-yellow-400 font-bold not-italic">[Nhập chủ đề vào đây]</span>. Yêu cầu trả về văn bản thô, mỗi câu trên 1 dòng duy nhất, không có số thứ tự câu ở đầu dòng, phân tách các phần bằng dấu |. Định dạng: Câu hỏi | Đáp án 1 | Đáp án 2 | Đáp án 3 | Đáp án 4 | Số đáp án đúng (1-4)"
                 </p>
             </div>
 
@@ -357,9 +358,18 @@ Phần mềm dựng phim chuyên nghiệp của Adobe? | Photoshop | After Effec
         let wrongQuestionsLog = [];
         let currentElapsedMs = 0; 
 
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let audioCtx = null; // Khởi tạo rỗng để tránh kích hoạt sớm trước tương tác của iOS Safari
 
-        // HÀM SAO CHÉP NHANH CÂU LỆNH AI VÀO CLIPBOARD CỦA IPHONE / PC
+        // HÀM KHỞI TẠO ÂM THANH AN TOÀN TRÊN ĐIỆN THOẠI APPLE
+        function ensureAudioContextInitialized() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
         function copyAiPromptToClipboard() {
             const promptText = `Hãy biên soạn cho tôi một bộ đề gồm 15 câu trắc nghiệm kiến thức về chủ đề: [ĐIỀN CHỦ ĐỀ MUỐN HỌC VÀO ĐÂY]. Yêu cầu bắt buộc: Trả về kết quả dưới dạng văn bản thô (Plain Text), mỗi câu hỏi nằm trên một dòng duy nhất, không có số thứ tự câu ở đầu dòng, phân tách các phần bằng dấu gạch đứng "|". Định dạng chính xác từng dòng: Câu hỏi | Đáp án 1 | Đáp án 2 | Đáp án 3 | Đáp án 4 | Số đáp án đúng (từ 1 đến 4). Ví dụ mẫu: Ngôi sao nào ở gần Trái Đất nhất? | Sao Kim | Mặt Trời | Sao Hỏa | Sao Bắc Cực | 2`;
             
@@ -368,7 +378,6 @@ Phần mềm dựng phim chuyên nghiệp của Adobe? | Photoshop | After Effec
                 btn.innerText = "✓ Đã sao chép! 📋";
                 btn.classList.replace('text-cyan-300', 'text-emerald-300');
                 
-                // Trả trạng thái nút sau 2.5 giây
                 setTimeout(() => {
                     btn.innerText = "📋 Sao chép lệnh AI";
                     btn.classList.replace('text-emerald-300', 'text-cyan-300');
@@ -380,6 +389,9 @@ Phần mềm dựng phim chuyên nghiệp của Adobe? | Photoshop | After Effec
 
         function playSound(type) {
             if (audioMuted) return;
+            ensureAudioContextInitialized();
+            if (!audioCtx) return;
+
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.connect(gain); gain.connect(audioCtx.destination);
@@ -400,6 +412,7 @@ Phần mềm dựng phim chuyên nghiệp của Adobe? | Photoshop | After Effec
         }
 
         function switchScreen(oldId, newId) {
+            ensureAudioContextInitialized(); // Bẫy tương tác kích hoạt âm thanh khi người dùng bấm phím
             document.getElementById(oldId).classList.add('hidden');
             document.getElementById(newId).classList.remove('hidden');
         }
@@ -416,6 +429,7 @@ Phần mềm dựng phim chuyên nghiệp của Adobe? | Photoshop | After Effec
         }
 
         function openSetupScreen(mode) {
+            ensureAudioContextInitialized();
             gameMode = mode === 'single' ? 'single' : 'multi';
             isHost = mode === 'host';
             
@@ -431,6 +445,7 @@ Phần mềm dựng phim chuyên nghiệp của Adobe? | Photoshop | After Effec
         }
 
         function launchGameEngine() {
+            clearInterval(timerInterval); // Khóa an toàn chống trùng lặp luồng chạy thời gian
             const rawText = document.getElementById('bulk-input').value;
             originalQuestions = parseBulkInput(rawText);
             
@@ -498,6 +513,7 @@ Phần mềm dựng phim chuyên nghiệp của Adobe? | Photoshop | After Effec
         }
 
         function startQuizRound(idx) {
+            clearInterval(timerInterval); // Reset cưỡng chế luồng đếm giờ của câu trước
             currentIdx = idx;
             canAnswer = true;
             isPaused = false;
@@ -541,6 +557,7 @@ Phần mềm dựng phim chuyên nghiệp của Adobe? | Photoshop | After Effec
             updateTimerBarUI(currentElapsedMs, totalMs);
 
             timerInterval = setInterval(() => {
+                if (isPaused) return; // Bảo vệ đóng băng thời gian
                 currentElapsedMs += 100;
                 singleTimeLeft = 15 - (currentElapsedMs / 1000);
                 updateTimerBarUI(currentElapsedMs, totalMs);
@@ -554,7 +571,8 @@ Phần mềm dựng phim chuyên nghiệp của Adobe? | Photoshop | After Effec
         function updateTimerBarUI(elapsed, totalMs) {
             let pct = 100 - (elapsed / totalMs) * 100;
             if (pct < 0) pct = 0;
-            document.getElementById('timer-bar').style.width = `${pct}%`;
+            const bar = document.getElementById('timer-bar');
+            if(bar) bar.style.width = `${pct}%`;
         }
 
         function handleOptionClick(chosenIdx) {
@@ -631,6 +649,7 @@ Phần mềm dựng phim chuyên nghiệp của Adobe? | Photoshop | After Effec
         }
 
         function goToNextQuestionSequence() {
+            clearInterval(timerInterval);
             currentIdx++;
             if (currentIdx < questions.length) {
                 startQuizRound(currentIdx);
@@ -680,6 +699,8 @@ Phần mềm dựng phim chuyên nghiệp của Adobe? | Photoshop | After Effec
         }
 
         function showFinalGameSummaryReport() {
+            clearInterval(timerInterval);
+            clearInterval(hostTimerInterval);
             document.getElementById('game-screen').classList.add('hidden');
             document.getElementById('result-screen').classList.remove('hidden');
 
@@ -747,7 +768,7 @@ Phần mềm dựng phim chuyên nghiệp của Adobe? | Photoshop | After Effec
         function sendNetworkMessage(p) {
             if (client && client.isConnected()) {
                 const m = new Paho.MQTT.Message(JSON.stringify(p));
-                m.destinationName = "quizizz_multiplayer_room_" + roomCode; m.send(m);
+                m.destinationName = "quizizz_multiplayer_room_" + roomCode; client.send(m);
             }
         }
 
@@ -843,26 +864,42 @@ Phần mềm dựng phim chuyên nghiệp của Adobe? | Photoshop | After Effec
             });
         }
 
+        // TỔNG HỢP KIỂM TRA THỨ HẠNG CUỐI PHÒNG
         function calculateFinalNetRank() {
             let ranking = Object.keys(networkPlayers).map(n => ({ name: n, score: networkPlayers[n].score || 0 }));
             ranking.sort((a, b) => b.score - a.score);
-            return ranking.findIndex(p => p.name === myName) + 1;
+            let idx = ranking.findIndex(p => p.name === myName);
+            return idx !== -1 ? idx + 1 : 1;
         }
 
         function exitGamePermanently() {
             if (confirm("Xác nhận rời trận và hủy kết quả lượt chơi này?")) window.location.reload();
         }
 
+        // BỘ ENGINE PHÂN TÍCH CHUỖI KHÔNG SỢ LỖI DỰ LIỆU (ULTRA-RESILIENT PARSER)
         function parseBulkInput(text) {
-            const lines = text.split('\n'); const res = [];
+            if (!text) return [];
+            // Đồng bộ định dạng, xử lý triệt để ký tự xuống dòng \r của Windows Excel
+            const lines = text.replace(/\r/g, '').split('\n'); 
+            const res = [];
+            
             lines.forEach(line => {
-                if (!line.trim()) return;
-                let spl = line.includes('\t') ? '\t' : '|';
-                const tk = line.split(spl).map(i => i.trim());
-                if (tk.length >= 6) {
-                    const aIdx = parseInt(tk[5]) - 1;
-                    if (!isNaN(aIdx) && aIdx >= 0 && aIdx <= 3) {
-                        res.push({ question: tk[0], options: [tk[1], tk[2], tk[3], tk[4]], correct: aIdx });
+                const trimmedLine = line.trim();
+                if (!trimmedLine) return; // Bỏ qua dòng trống
+                
+                // Nhận diện phân tách linh hoạt Tab hoặc dấu |
+                let separator = trimmedLine.includes('\t') ? '\t' : '|';
+                const tokens = trimmedLine.split(separator).map(i => i.trim());
+                
+                if (tokens.length >= 6) {
+                    const ansIdx = parseInt(tokens[5]) - 1;
+                    // Chốt chặn xác thực dữ liệu: Câu hỏi phải có nội dung và số đáp án đúng phải từ 1-4
+                    if (!isNaN(ansIdx) && ansIdx >= 0 && ansIdx <= 3 && tokens[0].length > 0) {
+                        res.push({ 
+                            question: tokens[0], 
+                            options: [tokens[1], tokens[2], tokens[3], tokens[4]], 
+                            correct: ansIdx 
+                        });
                     }
                 }
             });
