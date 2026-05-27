@@ -184,7 +184,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
             </div>
 
             <div class="grid grid-cols-3 gap-3 pt-1">
-                <button onclick="switchScreen('setup-screen', 'dashboard-screen')" class="col-span-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 py-3.5 rounded-xl font-bold text-xs uppercase active:scale-95 transition-all">
+                <button onclick="backToDashboardHome()" class="col-span-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 py-3.5 rounded-xl font-bold text-xs uppercase active:scale-95 transition-all">
                     🏠 Quay Lại
                 </button>
                 <button onclick="processAndLoadDatabase()" class="col-span-2 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:brightness-110 py-3.5 rounded-xl font-black text-sm sm:text-base tracking-widest uppercase shadow-lg active:scale-95 transition-all">
@@ -384,11 +384,11 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
         </div>
     </div>
 
-    <div id="result-screen" class="w-full max-w-2xl quizizz-glass rounded-3xl p-5 sm:p-7 text-center hidden animate__animated animate__fadeIn">
+    <div id="result-screen" class="w-full max-w-2xl quizizz-glass rounded-3xl p-5 text-center hidden animate__animated animate__fadeIn">
         <span class="text-4xl block mb-2">🏁</span>
         <h1 class="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-amber-500 mb-4 uppercase">KẾT THÚC LƯỢT CHƠI</h1>
         
-        <div class="bg-slate-950/80 border border-purple-900 rounded-2xl p-4 sm:p-5 my-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-left text-sm">
+        <div class="bg-slate-950/80 border border-purple-900 rounded-2xl p-4 my-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-left text-sm">
             <div>
                 <span class="text-xs text-gray-400 uppercase font-bold block">Kết quả chung cuộc</span>
                 <div id="final-rank-txt" class="text-3xl font-black text-cyan-400 my-1">HOÀN THÀNH</div>
@@ -413,7 +413,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
                 🏠 Về bảng điều khiển
             </button>
             <button onclick="window.location.reload()" class="w-full bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 hover:brightness-110 py-3 rounded-xl font-black uppercase text-xs shadow-md transition-all active:scale-95">
-                🔄 Ôn luyện tệp đề mới
+                🔄 Ôn tập chủ đề mới
             </button>
         </div>
     </div>
@@ -738,6 +738,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
         }
 
         let timerInterval = null;
+        let singleTimeLeft = 15;
         function runSingleTimerCore() {
             clearInterval(timerInterval);
             const totalMs = TIME_LIMIT_PER_QUESTION_SEC * 1000;
@@ -879,7 +880,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
                         <div class="p-3 bg-red-950/20 border border-red-900/30 rounded-xl text-xs space-y-1 animate__animated animate__fadeInUp">
                             <div class="font-extrabold text-gray-200 text-sm">❓ ${log.question}</div>
                             <div class="text-red-400">❌ Lựa chọn của bạn: <span class="font-bold">${log.yourChoose}</span></div>
-                            <div class="text-emerald-400">💡 Đáp án chuẩn xác: <span class="font-bold">${log.correctAnswer}</span></div>
+                            <div class="text-emerald-400">💡 Đáp án đúng chuẩn: <span class="font-bold">${log.correctAnswer}</span></div>
                         </div>
                     `;
                 });
@@ -887,7 +888,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
         }
 
         // ========================================================
-        // PHẦN MẠNG REALTIME ROOM: KẾT NỐI QUA PORT 8884
+        // PHẦN MẠNG REALTIME ROOM: KẾT NỐI QUA PORT 8884 ĐÃ FIX LỖI ĐƠ BUTTON
         // ========================================================
         function joinRoomAsPlayer() {
             roomCode = document.getElementById('input-room-code').value.trim();
@@ -1013,33 +1014,31 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
             });
         }
 
-        function calculateFinalNetRank() {
-            let ranking = Object.keys(networkPlayers).map(n => ({ name: n, score: networkPlayers[n].score || 0 }));
-            ranking.sort((a, b) => b.score - a.score);
-            let idx = ranking.findIndex(p => p.name === myName);
-            return idx !== -1 ? idx + 1 : 1;
-        }
-
+        // ĐIỀU HƯỚNG QUAY VỀ HOME AN TOÀN TUYỆT ĐỐI (F00L-PROOF ROUTER)
         function backToDashboardHome() {
-            clearInterval(timerInterval); clearInterval(hostTimerInterval);
-            if (client && client.isConnected()) { try { client.disconnect(); } catch(e){} }
-            ['mode-screen', 'multi-choice-screen', 'setup-screen', 'player-join-screen', 'lobby-screen', 'game-screen', 'flashcard-screen', 'result-screen'].forEach(id => { document.getElementById(id).classList.add('hidden'); });
-            document.getElementById('dashboard-screen').classList.remove('hidden');
-        }
-
-        function parseBulkInput(text) {
-            if (!text) return []; const lines = text.replace(/\r/g, '').split('\n'); const res = [];
-            lines.forEach(line => {
-                const trimmed = line.trim(); if (!trimmed) return;
-                let spl = trimmed.includes('\t') ? '\t' : '|'; const tokens = trimmed.split(spl).map(i => i.trim());
-                if (tokens.length >= 7) {
-                    const ansIdx = parseInt(tokens[6]) - 1;
-                    if (!isNaN(ansIdx) && ansIdx >= 0 && ansIdx <= 3 && tokens[1].length > 0) {
-                        res.push({ question: tokens[1], options: [tokens[2], tokens[3], tokens[4], tokens[5]], correct: ansIdx });
+            try {
+                clearInterval(timerInterval); 
+                clearInterval(hostTimerInterval);
+            } catch(e) { console.error(e); }
+            
+            // Xử lý ngắt kết nối MQTT an toàn, không lo sập luồng khi client trống (Single Player)
+            if (client) {
+                try {
+                    if (typeof client.isConnected === 'function' && client.isConnected()) {
+                        client.disconnect();
                     }
-                }
+                } catch(e) { console.error("Hủy kết nối mạng gặp lỗi:", e); }
+            }
+            
+            // Ẩn tất cả các màn hình hoạt động dựa trên kiểm tra thực tế phần tử
+            const screens = ['mode-screen', 'multi-choice-screen', 'setup-screen', 'player-join-screen', 'lobby-screen', 'game-screen', 'flashcard-screen', 'result-screen'];
+            screens.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) { el.classList.add('hidden'); }
             });
-            return res;
+            
+            const dash = document.getElementById('dashboard-screen');
+            if (dash) { dash.classList.remove('hidden'); }
         }
 
         function shuffleArray(arr) { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } }
