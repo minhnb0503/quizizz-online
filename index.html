@@ -100,7 +100,7 @@
             </span>
         </div>
         <div class="flex items-center gap-3">
-            <button onclick="toggleAudioMute()" id="mute-btn" class="bg-[#1a0b30] border border-purple-900/60 w-9 h-9 rounded-xl flex items-center justify-center text-sm transition-all active:scale-90 shadow-md">
+            <button type="button" onclick="toggleAudioMute()" id="mute-btn" class="bg-[#1a0b30] border border-purple-900/60 w-9 h-9 rounded-xl flex items-center justify-center text-sm transition-all active:scale-90 shadow-md">
                 🔊
             </button>
             <div class="hidden sm:flex items-center bg-[#1a0b30] border border-purple-500/20 px-4 py-1.5 rounded-full text-xs font-bold gap-2">
@@ -116,13 +116,13 @@
             <div class="md:col-span-2 quizizz-glass rounded-3xl p-4 sm:p-5 flex flex-col justify-center">
                 <div class="flex flex-col sm:flex-row gap-3 items-stretch w-full">
                     <input type="text" id="input-room-code" placeholder="Nhập mã phòng 6 số chơi mạng..." class="flex-1 quizizz-input rounded-xl px-4 py-3.5 font-black text-lg text-yellow-400 focus:outline-none text-center sm:text-left">
-                    <button onclick="joinRoomAsPlayer()" class="bg-pink-600 border-b-4 border-pink-800 hover:bg-pink-500 py-3.5 px-6 rounded-xl font-extrabold text-base transition-all active:scale-95 text-center shrink-0">
+                    <button type="button" onclick="joinRoomAsPlayer()" class="bg-pink-600 border-b-4 border-pink-800 hover:bg-pink-500 py-3.5 px-6 rounded-xl font-extrabold text-base transition-all active:scale-95 text-center shrink-0">
                         Tham Gia Phòng 🎮
                     </button>
                 </div>
             </div>
             <div class="quizizz-glass rounded-3xl p-4 flex items-center justify-center">
-                <button onclick="switchScreen('dashboard-screen', 'setup-screen')" class="w-full btn-quizizz-purple py-4 px-4 rounded-2xl font-extrabold text-sm sm:text-base tracking-wide flex items-center justify-center gap-2">
+                <button type="button" onclick="switchScreen('dashboard-screen', 'setup-screen')" class="w-full btn-quizizz-purple py-4 px-4 rounded-2xl font-extrabold text-sm sm:text-base tracking-wide flex items-center justify-center gap-2">
                     🛠️ QUẢN LÝ / NẠP FILE ĐỀ
                 </button>
             </div>
@@ -412,7 +412,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
             <button type="button" onclick="backToDashboardHome()" class="w-full bg-slate-900 hover:bg-slate-800 border border-slate-800 py-3 rounded-xl font-bold uppercase text-xs transition-all active:scale-95">
                 🏠 Về bảng điều khiển
             </button>
-            <button type="button" onclick="window.location.reload()" class="w-full bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 hover:brightness-110 py-3 rounded-xl font-black uppercase text-xs shadow-md transition-all active:scale-95">
+            <button type="button" onclick="window.location.reload()" class="w-full bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 hover:brightness-110 py-3 rounded-xl font-black uppercase transition-all active:scale-95">
                 🔄 Ôn tập chủ đề mới
             </button>
         </div>
@@ -465,7 +465,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
                 osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); 
                 osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.08); 
                 gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.23);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.25);
             } else if (type === 'bad') {
                 osc.type = 'triangle';
                 osc.frequency.setValueAtTime(261.63, audioCtx.currentTime); 
@@ -482,16 +482,20 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
 
         function switchScreen(oldId, newId) {
             ensureAudioContextInitialized();
-            document.getElementById(oldId).classList.add('hidden');
-            document.getElementById(newId).classList.remove('hidden');
+            const oldEl = document.getElementById(oldId);
+            const newEl = document.getElementById(newId);
+            if (oldEl) oldEl.classList.add('hidden');
+            if (newEl) newEl.classList.remove('hidden');
         }
 
         function copyAiPromptToClipboard() {
             const promptText = `Hãy biên soạn cho tôi một bộ đề gồm nhiều câu trắc nghiệm thuộc các lĩnh vực khác nhau. Mỗi câu hỏi nằm trên một dòng duy nhất, không có số thứ tự câu ở đầu dòng, phân tách các cột bằng dấu gạch đứng "|". Định dạng chính xác từng dòng: Tên chủ đề | Câu hỏi | Đáp án 1 | Đáp án 2 | Đáp án 3 | Đáp án 4 | Số đáp án đúng (từ 1 đến 4). Ví dụ: Mathematics | Hình tam giác có tổng ba góc bằng bao nhiêu độ? | 90 độ | 180 độ | 360 độ | 60 độ | 2`;
             navigator.clipboard.writeText(promptText).then(() => {
                 const btn = document.getElementById('copy-prompt-btn');
-                btn.innerText = "✓ Đã sao chép! 📋";
-                setTimeout(() => { btn.innerText = "📋 Sao chép lệnh AI"; }, 2500);
+                if (btn) {
+                    btn.innerText = "✓ Đã sao chép! 📋";
+                    setTimeout(() => { btn.innerText = "📋 Sao chép lệnh AI"; }, 2500);
+                }
             });
         }
 
@@ -544,8 +548,12 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
         function renderDashboardTopics() {
             const container = document.getElementById('dynamic-topics-zone');
             if (!container) return;
-            const topics = Object.keys(globalDatabase);
             
+            if (!globalDatabase || typeof globalDatabase !== 'object' || Array.isArray(globalDatabase)) {
+                globalDatabase = {};
+            }
+            
+            const topics = Object.keys(globalDatabase);
             const badgeEl = document.getElementById('topic-count-badge');
             if (badgeEl) badgeEl.innerText = `${topics.length} chủ đề`;
 
@@ -558,6 +566,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
             const themeColors = ['bg-[#2f6dae]', 'bg-[#2d9da6]', 'bg-[#efa929]', 'bg-[#bc2863]', 'bg-[#8d66af]'];
 
             topics.forEach((topic, idx) => {
+                if (!Array.isArray(globalDatabase[topic])) return;
                 const quizCount = globalDatabase[topic].length;
                 const randomColor = themeColors[idx % themeColors.length];
 
@@ -573,7 +582,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
                         </span>
                     </div>
                     <div class="overflow-x-auto hide-scrollbar flex flex-row gap-4 py-1">
-                        <div onclick="startSinglePracticeRound('${topic}')" class="bg-[#1d0d33] border border-purple-500/10 rounded-xl p-4 min-w-[200px] max-w-[200px] flex flex-col justify-between items-start cursor-pointer hover:border-purple-500/40 transition-all active:scale-95 shrink-0 shadow-md">
+                        <div onclick="startSinglePracticeRound('${topic.replace(/'/g, "\\'")}')" class="bg-[#1d0d33] border border-purple-500/10 rounded-xl p-4 min-w-[200px] max-w-[200px] flex flex-col justify-between items-start cursor-pointer hover:border-purple-500/40 transition-all active:scale-95 shrink-0 shadow-md">
                             <div class="w-10 h-10 rounded-xl ${randomColor} flex items-center justify-center text-white/70 text-lg font-bold mb-4 shadow-inner">📝</div>
                             <div class="w-full">
                                 <div class="text-[10px] text-cyan-400 font-bold uppercase tracking-wider mb-0.5">${quizCount} Câu hỏi</div>
@@ -581,7 +590,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
                                 <p class="text-[10px] text-gray-500 mt-2">Chạy thần tốc không chờ</p>
                             </div>
                         </div>
-                        <div onclick="startFlashcardRound('${topic}')" class="bg-[#1d0d33] border border-cyan-500/10 rounded-xl p-4 min-w-[200px] max-w-[200px] flex flex-col justify-between items-start cursor-pointer hover:border-cyan-500/40 transition-all active:scale-95 shrink-0 shadow-md">
+                        <div onclick="startFlashcardRound('${topic.replace(/'/g, "\\'")}')" class="bg-[#1d0d33] border border-cyan-500/10 rounded-xl p-4 min-w-[200px] max-w-[200px] flex flex-col justify-between items-start cursor-pointer hover:border-cyan-500/40 transition-all active:scale-95 shrink-0 shadow-md">
                             <div class="w-10 h-10 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center text-white/70 text-lg font-bold mb-4 shadow-inner">🎴</div>
                             <div class="w-full">
                                 <div class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider mb-0.5">Active Recall</div>
@@ -589,7 +598,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
                                 <p class="text-[10px] text-gray-500 mt-2">Lật mặt ghi nhớ kiến thức</p>
                             </div>
                         </div>
-                        <div onclick="startMultiplayerHostSession('${topic}')" class="bg-[#1d0d33] border border-pink-500/10 rounded-xl p-4 min-w-[200px] max-w-[200px] flex flex-col justify-between items-start cursor-pointer hover:border-pink-500/40 transition-all active:scale-95 shrink-0 shadow-md">
+                        <div onclick="startMultiplayerHostSession('${topic.replace(/'/g, "\\'")}')" class="bg-[#1d0d33] border border-pink-500/10 rounded-xl p-4 min-w-[200px] max-w-[200px] flex flex-col justify-between items-start cursor-pointer hover:border-pink-500/40 transition-all active:scale-95 shrink-0 shadow-md">
                             <div class="w-10 h-10 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 flex items-center justify-center text-white/70 text-lg font-bold mb-4 shadow-inner">👑</div>
                             <div class="w-full">
                                 <div class="text-[10px] text-pink-400 font-bold uppercase tracking-wider mb-0.5">Realtime Room</div>
@@ -619,6 +628,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
         function startSinglePracticeRound(topicName) {
             gameMode = 'single'; isHost = false;
             let rawQuestions = globalDatabase[topicName];
+            if (!rawQuestions) return;
             questions = JSON.parse(JSON.stringify(rawQuestions));
 
             if (document.getElementById('shuffle-toggle').checked) {
@@ -647,6 +657,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
         function startFlashcardRound(topicName) {
             gameMode = 'flashcard'; isHost = false;
             let rawQuestions = globalDatabase[topicName];
+            if (!rawQuestions) return;
             questions = JSON.parse(JSON.stringify(rawQuestions));
             
             shuffleArray(questions);
@@ -685,6 +696,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
         function startMultiplayerHostSession(topicName) {
             gameMode = 'multi'; isHost = true;
             let rawQuestions = globalDatabase[topicName];
+            if (!rawQuestions) return;
             questions = JSON.parse(JSON.stringify(rawQuestions));
             shuffleArray(questions);
 
@@ -1035,37 +1047,59 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
 
         function shuffleArray(arr) { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } }
 
-        // BẢO VỆ CHỐNG SẬP LUỒNG KHỞI CHẠY KHÔI PHỤC KHO DỮ LIỆU TỪ LOCAL STORAGE SẠCH LỖI
-        document.addEventListener("DOMContentLoaded", function() {
-            const savedDb = localStorage.getItem('wayground_ultimate_db');
-            const savedRaw = localStorage.getItem('wayground_raw_input');
-            
-            if (savedDb && savedRaw) {
-                globalDatabase = JSON.parse(savedDb);
-                const bulkInputEl = document.getElementById('bulk-input');
-                if (bulkInputEl) bulkInputEl.value = savedRaw;
-                renderDashboardTopics();
-            } else {
-                // Tách biệt hoàn toàn luồng đọc chuỗi thuần không gọi hàm bao ngoài lặp đơ luồng
-                const inputEl = document.getElementById('bulk-input');
-                if (inputEl && inputEl.value.trim()) {
-                    const lines = inputEl.value.replace(/\r/g, '').split('\n');
-                    globalDatabase = {}; 
-                    lines.forEach(line => {
-                        const trimmed = line.trim();
-                        if (!trimmed) return;
-                        let spl = trimmed.includes('\t') ? '\t' : '|';
-                        const tokens = trimmed.split(spl).map(i => i.trim());
-                        if (tokens.length >= 7) {
-                            const ansIdx = parseInt(tokens[6]) - 1;
-                            if (!isNaN(ansIdx) && ansIdx >= 0 && ansIdx <= 3 && tokens[1].length > 0) {
-                                if (!globalDatabase[tokens[0]]) { globalDatabase[tokens[0]] = []; }
-                                globalDatabase[tokens[0]].push({ question: tokens[1], options: [tokens[2], tokens[3], tokens[4], tokens[5]], correct: ansIdx });
-                            }
+        function forceLoadDefaultFactorySettings() {
+            const inputEl = document.getElementById('bulk-input');
+            if (inputEl && inputEl.value.trim()) {
+                const lines = inputEl.value.replace(/\r/g, '').split('\n');
+                globalDatabase = {}; 
+                lines.forEach(line => {
+                    const trimmed = line.trim();
+                    if (!trimmed) return;
+                    let spl = trimmed.includes('\t') ? '\t' : '|';
+                    const tokens = trimmed.split(spl).map(i => i.trim());
+                    if (tokens.length >= 7) {
+                        const ansIdx = parseInt(tokens[6]) - 1;
+                        if (!isNaN(ansIdx) && ansIdx >= 0 && ansIdx <= 3 && tokens[1].length > 0) {
+                            if (!globalDatabase[tokens[0]]) { globalDatabase[tokens[0]] = []; }
+                            globalDatabase[tokens[0]].push({ question: tokens[1], options: [tokens[2], tokens[3], tokens[4], tokens[5]], correct: ansIdx });
                         }
-                    });
+                    }
+                });
+                renderDashboardTopics();
+            }
+        }
+
+        // CHỐNG CRASH VÀ KHỞI TẠO BẢO VỆ TUYỆT ĐỐI KHỎI CACHE LỖI THỜI
+        document.addEventListener("DOMContentLoaded", function() {
+            try {
+                const savedDb = localStorage.getItem('wayground_ultimate_db');
+                const savedRaw = localStorage.getItem('wayground_raw_input');
+                
+                if (savedDb && savedRaw) {
+                    globalDatabase = JSON.parse(savedDb);
+                    
+                    // Kiểm tra tính toàn vẹn cấu trúc object để tránh xung đột v5.1
+                    if (typeof globalDatabase !== 'object' || globalDatabase === null || Array.isArray(globalDatabase)) {
+                        throw new Error("Phát hiện cấu trúc đệm cũ.");
+                    }
+                    
+                    for (let key in globalDatabase) {
+                        if (!Array.isArray(globalDatabase[key])) {
+                            throw new Error("Dữ liệu danh mục không khớp.");
+                        }
+                    }
+
+                    const bulkInputEl = document.getElementById('bulk-input');
+                    if (bulkInputEl) bulkInputEl.value = savedRaw;
                     renderDashboardTopics();
+                } else {
+                    forceLoadDefaultFactorySettings();
                 }
+            } catch (e) {
+                console.warn("Dọn dẹp xung đột LocalStorage cũ thành công:", e);
+                localStorage.removeItem('wayground_ultimate_db');
+                localStorage.removeItem('wayground_raw_input');
+                forceLoadDefaultFactorySettings();
             }
         });
     </script>
