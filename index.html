@@ -543,6 +543,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
         // ========================================================
         function renderDashboardTopics() {
             const container = document.getElementById('dynamic-topics-zone');
+            if (!container) return;
             const topics = Object.keys(globalDatabase);
             document.getElementById('topic-count-badge').innerText = `${topics.length} chủ đề`;
 
@@ -650,7 +651,6 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
             let rawQuestions = globalDatabase[topicName];
             questions = JSON.parse(JSON.stringify(rawQuestions));
             
-            // Tự động xáo trộn để đảo vị trí học
             shuffleArray(questions);
             currentIdx = 0;
             isFlashcardFlipped = false;
@@ -678,7 +678,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
         }
 
         function nextFlashcardSequence(event) {
-            if(event) event.stopPropagation(); // Ngăn chặn sự kiện nổi bọt lật ngược thẻ
+            if(event) event.stopPropagation(); 
             currentIdx++;
             if (currentIdx < questions.length) { renderCurrentFlashcardData(); }
             else { alert("🎉 Chúc mừng bạn! Bạn đã hoàn thành việc lật thẻ ghi nhớ toàn bộ kho từ vựng/công thức của chủ đề này rồi!"); backToDashboardHome(); }
@@ -809,7 +809,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
                 showInstantMemeFeedback(isCorrect, pts);
             } else {
                 showInstantMemeFeedback(isCorrect, pts);
-                setTimeout(jumpToNextRoundSequence, 600); // 0.6s chuyển câu không delay chết
+                setTimeout(jumpToNextRoundSequence, 600); 
             }
         }
 
@@ -848,7 +848,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
             waitTxt.style.display = gameMode === 'multi' ? 'block' : 'none';
 
             if (isCorrect) {
-                em.innerText = "⚡"; title.innerText = "CHÍNH XÁC"; title.className = "text-xl font-black text-emerald-400";
+                em.innerText = "⚡"; title.innerText = "CHÍNH XAC"; title.className = "text-xl font-black text-emerald-400";
                 box.classList.add('border-emerald-500'); sub.innerText = `+${pts} Điểm`;
             } else {
                 em.innerText = isTimeout ? "⏰" : "😢"; title.innerText = isTimeout ? "HẾT GIỜ" : "SAI MẤT RỒI";
@@ -888,7 +888,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
         }
 
         // ========================================================
-        // PHẦN MẠNG REALTIME ROOM: KẾT NỐI QUA PORT 8884 ĐÃ FIX LỖI ĐƠ BUTTON
+        // PHẦN MẠNG REALTIME ROOM: KẾT NỐI QUA PORT 8884
         // ========================================================
         function joinRoomAsPlayer() {
             roomCode = document.getElementById('input-room-code').value.trim();
@@ -982,7 +982,6 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
                     clearInterval(hostTimerInterval);
                     sendNetworkMessage({ type: 'HOST_FORCE_END_ROUND', correctIndex: questions[currentIdx].correct });
                     
-                    // Cơ chế tạo cửa sổ 4 giây ngắm đáp án đồng bộ toàn phòng
                     setTimeout(() => {
                         if (currentIdx + 1 < questions.length) sendNetworkMessage({ type: 'HOST_NEXT_ROUND', nextIdx: currentIdx + 1 });
                         else sendNetworkMessage({ type: 'HOST_END_GAME' });
@@ -1014,14 +1013,13 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
             });
         }
 
-        // ĐIỀU HƯỚNG QUAY VỀ HOME AN TOÀN TUYỆT ĐỐI (F00L-PROOF ROUTER)
+        // ĐIỀU HƯỚNG QUAY VỀ HOME AN TOÀN TUYỆT ĐỐI (FOOL-PROOF ROUTER)
         function backToDashboardHome() {
             try {
                 clearInterval(timerInterval); 
                 clearInterval(hostTimerInterval);
             } catch(e) { console.error(e); }
             
-            // Xử lý ngắt kết nối MQTT an toàn, không lo sập luồng khi client trống (Single Player)
             if (client) {
                 try {
                     if (typeof client.isConnected === 'function' && client.isConnected()) {
@@ -1030,7 +1028,6 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
                 } catch(e) { console.error("Hủy kết nối mạng gặp lỗi:", e); }
             }
             
-            // Ẩn tất cả các màn hình hoạt động dựa trên kiểm tra thực tế phần tử
             const screens = ['mode-screen', 'multi-choice-screen', 'setup-screen', 'player-join-screen', 'lobby-screen', 'game-screen', 'flashcard-screen', 'result-screen'];
             screens.forEach(id => {
                 const el = document.getElementById(id);
@@ -1043,20 +1040,20 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
 
         function shuffleArray(arr) { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } }
 
-        // CƠ CHẾ KHỞI CHẠY KHÔI PHỤC KHO DỮ LIỆU TỪ LOCAL STORAGE KHI BẬT MÁY
-        window.onload = function() {
+        // BẢO VỆ CHỐNG SẬP LUỒNG KHỞI CHẠY (DOMContentLoaded PROTECTION CORE)
+        document.addEventListener("DOMContentLoaded", function() {
             const savedDb = localStorage.getItem('wayground_ultimate_db');
             const savedRaw = localStorage.getItem('wayground_raw_input');
             
             if (savedDb && savedRaw) {
                 globalDatabase = JSON.parse(savedDb);
-                document.getElementById('bulk-input').value = savedRaw;
+                const bulkInputEl = document.getElementById('bulk-input');
+                if (bulkInputEl) bulkInputEl.value = savedRaw;
                 renderDashboardTopics();
             } else {
-                // Nếu máy trống, tự động kích hoạt nạp kho đề mẫu có sẵn
                 processAndLoadDatabase();
             }
-        };
+        });
     </script>
 </body>
 </html>
