@@ -165,7 +165,7 @@
             <div class="bg-slate-950/90 border border-purple-900/40 rounded-2xl p-4 shadow-inner">
                 <div class="flex items-center justify-between border-b border-purple-950 pb-2 mb-2">
                     <span class="text-xs font-extrabold text-purple-400 tracking-wide uppercase flex items-center gap-1">
-                        🤖 Trợ lý bóc tách đề đa danh mục qua Gemini
+                        🤖 Trợ lý bóc tách đề vạn năng qua Gemini AI
                     </span>
                     <button type="button" id="copy-prompt-btn" class="bg-purple-950 hover:bg-purple-900 border border-purple-700 text-purple-300 font-extrabold text-[10px] sm:text-xs px-3 py-1.5 rounded-xl transition-all active:scale-90 shadow-md">
                         📋 Sao chép lệnh AI
@@ -188,7 +188,7 @@
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-gray-400 uppercase mb-1 tracking-widest">Dán nội dung tệp đề đa chủ đề vào đây:</label>
+                <label class="block text-xs font-bold text-gray-400 uppercase mb-1 tracking-widest">Dán nội dung dữ liệu chữ do Gemini xuất ra vào đây:</label>
                 <textarea id="bulk-input" rows="6" class="w-full quizizz-input rounded-xl p-3 text-xs sm:text-sm font-mono focus:outline-none" placeholder="Dán nội dung đề phân tách dấu | vào đây...">Confidence Intervals | Khoảng tin cậy cho một trung bình tổng thể được sử dụng nhằm mục đích gì? | Ước lượng giá trị tham số tổng thể chưa biết | Kiểm định tính độc lập của biến | Tìm phương sai của mẫu khảo sát | Xác định độ lệch chuẩn chuẩn xác | 1
 Confidence Intervals | Khi kích thước mẫu tăng lên và độ tin cậy giữ nguyên, độ rộng khoảng tin cậy sẽ biến đổi như thế nào? | Tăng lên đáng kể | Thu hẹp lại | Giữ nguyên cố định | Biến thiên ngẫu nhiên | 2
 Rational Functions | Tiệm cận đứng của đồ thị hàm số phân thức y = (2x + 1) / (x - 3) là đường thẳng nào? | x = 3 | y = 2 | x = -3 | y = -3 | 1
@@ -229,7 +229,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
         </div>
         <div class="mt-4 pt-4 border-t border-purple-950">
             <button type="button" id="btn-lobby-exit" class="w-full bg-slate-950 text-gray-500 font-bold py-2 rounded-xl text-xs transition-all">
-                🏃‍♂️ Rời phòng chờ
+                Rời phòng chờ
             </button>
         </div>
     </div>
@@ -250,7 +250,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
                         <span id="streak-count" class="font-black text-yellow-400 text-[10px]">STREAK X0</span>
                     </div>
                     <div class="flex items-center gap-1.5 shrink-0">
-                        <button type="button" id="pause-btn" class="bg-purple-900/60 hover:bg-purple-800 border border-purple-700/60 px-2.5 py-1.5 rounded-xl text-[10px] font-black text-purple-200 transition-all active:scale-90 hidden">
+                        <button type="button" id="pause-btn" class="bg-purple-900/60 hover:bg-purple-800 border border-purple-700/60 px-2.5 py-1.5 rounded-xl text-[10px] font-black text-purple-200 transition-all active:scale-90">
                             ⏸ Tạm dừng
                         </button>
                         <button type="button" id="btn-game-exit" class="bg-red-950/60 hover:bg-red-800 border border-red-900 px-2.5 py-1 rounded-xl text-[10px] font-black text-red-200 transition-all active:scale-90">
@@ -451,13 +451,15 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
         let questions = [];      
         let currentIdx = 0;      let playerScore = 0;    let currentStreak = 0;
         let correctAnswersCount = 0;                     let wrongAnswersCount = 0;
-        let canAnswer = false;   let currentElapsedMs = 0;
+        let canAnswer = false;   let currentElapsedMs = 0; let singleTimeLeft = 15;
         
         let wrongQuestionsLog = [];
         let networkPlayers = {};
         let activeTopicPlayingName = "";
 
         let audioCtx = null;
+        let timerInterval = null;
+        let hostTimerInterval = null;
 
         function ensureAudioContextInitialized() {
             if (!audioCtx) {
@@ -505,9 +507,9 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
             if (newEl) newEl.classList.remove('hidden');
         }
 
-        // CƠ CHẾ SAO CHÉP PROMPT DỰ PHÒNG ĐA NỀN TẢNG (CHỐNG TREO SAFARI IPHONE)
+        // CƠ CHẾ SAO CHÉP PROMPT DỰ PHÒNG ĐA NỀN TẢNG (CHỐNG TREO SAFARI IPHONE CỦA PHẦN 1)
         function copyAiPromptToClipboard() {
-            const promptText = `Hãy biên soạn cho tôi một bộ đề gồm nhiều câu trắc nghiệm thuộc các lĩnh vực khác nhau. Mỗi câu hỏi nằm trên một dòng duy nhất, không có số thứ tự câu ở đầu dòng, phân tách các cột bằng dấu gạch đứng "|". Định dạng chính xác từng dòng: Tên chủ đề | Câu hỏi | Đáp án 1 | Đáp án 2 | Đáp án 3 | Đáp án 4 | Số đáp án đúng (từ 1 đến 4). Ví dụ: Mathematics | Hình tam giác có tổng ba góc bằng bao nhiêu độ? | 90 độ | 180 độ | 360 độ | 60 độ | 2`;
+            const promptText = `**[Nhiệm vụ tối cao]:** Bạn là một Chuyên gia Khảo thí và Thiết kế Hệ thống Trắc nghiệm Cao cấp. Hãy đọc và phân tích toàn bộ các tệp tin được đính kèm (PowerPoint, Word, Excel, Hình ảnh tài liệu, hoặc tệp âm thanh/video) hoặc văn bản thô được dán ở dưới. Hãy trích lọc toàn bộ các kiến thức cốt lõi, công thức, định nghĩa và mốc sự kiện quan trọng để biên soạn thành một bộ đề trắc nghiệm hoàn chỉnh.\n\n**[Quy tắc xuất dữ liệu bắt buộc]:**\n1. Mỗi câu hỏi phải nằm gọn gàng trên **1 dòng duy nhất**. Không được xuống dòng giữa câu.\n2. Phân tách các trường dữ liệu bằng dấu gạch đứng "|". Không sử dụng phím Tab hay ký tự khác.\n3. Cấu trúc chuẩn xác của từng dòng:\nTên Chủ Đề | Nội dung câu hỏi trắc nghiệm | Phương án A | Phương án B | Phương án C | Phương án D | Số thứ tự đáp án đúng (từ 1 đến 4)\n4. **Tuyệt đối nghiêm cấm:** Không thêm số thứ tự câu ở đầu dòng, không định dạng tiêu đề, không bọc mã trong khối markdown, không giải thích dông dài, không có lời chào đầu hoặc lời kết thúc. Chỉ xuất ra các dòng dữ liệu thô sạch sẽ.`;
             
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(promptText).then(() => {
@@ -542,7 +544,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
                 document.execCommand('copy');
                 handleCopySuccessVisual();
             } catch (err) {
-                alert('Trình duyệt chặn quyền tự động sao chép. Vui lòng copy thủ công.');
+                alert('Vui lòng sao chép thủ công đoạn văn bản hướng dẫn AI.');
             }
             document.body.removeChild(textArea);
         }
@@ -875,8 +877,6 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
             else if (isHost) { runHostTimerCore(); }
         }
 
-        let timerInterval = null;
-        let singleTimeLeft = 15;
         function runSingleTimerCore() {
             clearInterval(timerInterval);
             const totalMs = TIME_LIMIT_PER_QUESTION_SEC * 1000;
@@ -1117,7 +1117,6 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
 
         function broadCastStartGame() { sendNetworkMessage({ type: 'START_GAME' }); }
 
-        let hostTimerInterval = null;
         function runHostTimerCore() {
             clearInterval(hostTimerInterval);
             let elapsed = 0; const totalMs = TIME_LIMIT_PER_QUESTION_SEC * 1000;
@@ -1228,10 +1227,10 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
             document.getElementById('btn-result-reload').addEventListener('click', () => window.location.reload());
             document.getElementById('mute-btn').addEventListener('click', toggleAudioMute);
             
-            // SỬA LỖI ĐƠ: KÍCH HOẠT SỰ KIỆN SAO CHÉP PROMPT AI CHO CẢ PC VÀ SMARTPHONE
+            // KÍCH HOẠT SỰ KIỆN SAO CHÉP PROMPT AI CHO CẢ PC VÀ SMARTPHONE
             document.getElementById('copy-prompt-btn').addEventListener('click', copyAiPromptToClipboard);
 
-            // SỬA LỖI ĐƠ: KÍCH HOẠT NÚT TẠM DỪNG TRẬN ĐẤU GÓC HUD GAME SCREEN
+            // KÍCH HOẠT NÚT TẠM DỪNG TRẬN ĐẤU GÓC HUD GAME SCREEN
             document.getElementById('pause-btn').addEventListener('click', togglePauseGame);
 
             // KÍCH HOẠT SỰ KIỆN CHẠM LẬT THẺ CHUẨN XÁC V6.2
