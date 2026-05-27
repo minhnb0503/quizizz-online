@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Quizizz Ultimate Arena - Wayground Premium</title>
+    <title>Quizizz Ultimate Arena - Wayground Perfect Edition</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -17,7 +17,7 @@
     <style>
         body {
             font-family: 'Quicksand', sans-serif;
-            background: radial-gradient(circle at center, #2b134d 0%, #090314 100%);
+            background: radial-gradient(circle at center, #231244 0%, #06020c 100%);
             overflow-x: hidden;
             /* Thiết lập vùng đệm an toàn tự động co giãn tránh lẹm vào tai thỏ và Dynamic Island của iPhone */
             padding-top: env(safe-area-inset-top, 20px);
@@ -30,14 +30,14 @@
             user-select: none;
         }
         .quizizz-glass {
-            background: rgba(23, 11, 41, 0.65);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
+            background: rgba(22, 11, 40, 0.65);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
             border: 2px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 30px 70px rgba(0,0,0,0.7);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.6);
         }
         .quizizz-input {
-            background-color: #1a0b30 !important;
+            background-color: #140826 !important;
             border: 2px solid rgba(111, 69, 155, 0.4) !important;
             transition: all 0.25s ease-in-out;
         }
@@ -93,19 +93,22 @@
 </head>
 <body class="text-white flex flex-col justify-start items-center p-3 sm:p-4">
 
-    <header class="w-full max-w-5xl flex items-center justify-between py-3 px-4 bg-[#170b29]/80 border-b border-white/5 backdrop-blur-md rounded-2xl mb-4 z-40">
+    <header class="w-full max-w-5xl flex items-center justify-between py-3 px-4 bg-[#160a27]/90 border-b border-white/5 backdrop-blur-md rounded-2xl mb-4 z-40">
         <div class="flex items-center gap-3">
-            <span class="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-400 to-cyan-400 tracking-tight cursor-pointer" onclick="backToDashboardHome()">
+            <span id="nav-logo-home" class="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-400 to-cyan-400 tracking-tight cursor-pointer">
                 WAYGROUND
             </span>
         </div>
+        <div class="hidden md:block flex-1 max-w-md mx-6">
+            <input type="text" id="search-topic-input" placeholder="Find a quiz or topic..." class="w-full bg-[#140826] border border-purple-900/40 rounded-xl px-4 py-2 text-xs text-purple-300 focus:outline-none focus:border-purple-500 transition-all">
+        </div>
         <div class="flex items-center gap-3">
-            <button type="button" onclick="toggleAudioMute()" id="mute-btn" class="bg-[#1a0b30] border border-purple-900/60 w-9 h-9 rounded-xl flex items-center justify-center text-sm transition-all active:scale-90 shadow-md">
+            <button id="mute-btn" class="bg-[#140826] border border-purple-900/50 w-9 h-9 rounded-xl flex items-center justify-center text-sm transition-all active:scale-90 shadow-md">
                 🔊
             </button>
-            <div class="hidden sm:flex items-center bg-[#1a0b30] border border-purple-500/20 px-4 py-1.5 rounded-full text-xs font-bold gap-2">
+            <div class="flex items-center bg-[#140826] border border-purple-500/10 px-3 py-1.5 rounded-full text-xs font-bold gap-1.5 shadow-inner">
                 <span class="text-yellow-400 text-sm">🥇</span>
-                <span id="header-coins-text" class="text-gray-300">500 coins</span>
+                <span id="global-coins-display" class="text-gray-300">500 coins</span>
             </div>
         </div>
     </header>
@@ -115,27 +118,40 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
             <div class="md:col-span-2 quizizz-glass rounded-3xl p-4 sm:p-5 flex flex-col justify-center">
                 <div class="flex flex-col sm:flex-row gap-3 items-stretch w-full">
-                    <input type="text" id="input-room-code" placeholder="Nhập mã phòng 6 số chơi mạng..." class="flex-1 quizizz-input rounded-xl px-4 py-3.5 font-black text-lg text-yellow-400 focus:outline-none text-center sm:text-left">
-                    <button type="button" onclick="joinRoomAsPlayer()" class="bg-pink-600 border-b-4 border-pink-800 hover:bg-pink-500 py-3.5 px-6 rounded-xl font-extrabold text-base transition-all active:scale-95 text-center shrink-0">
-                        Tham Gia Phòng 🎮
+                    <input type="text" id="input-room-code" placeholder="Enter a join code..." class="flex-1 quizizz-input rounded-xl px-4 py-3.5 font-black text-lg text-yellow-400 focus:outline-none text-center sm:text-left">
+                    <button type="button" id="btn-join-room-trigger" class="bg-[#6F459B] border-b-4 border-[#4a2b6b] hover:bg-[#8D66AF] py-3.5 px-6 rounded-xl font-extrabold text-base transition-all active:scale-95 text-center shrink-0">
+                        Join Game 🎮
                     </button>
                 </div>
             </div>
-            <div class="quizizz-glass rounded-3xl p-4 flex items-center justify-center">
-                <button type="button" onclick="switchScreen('dashboard-screen', 'setup-screen')" class="w-full btn-quizizz-purple py-4 px-4 rounded-2xl font-extrabold text-sm sm:text-base tracking-wide flex items-center justify-center gap-2">
+            <div class="quizizz-glass rounded-3xl p-4 flex flex-col justify-between gap-3">
+                <div class="flex items-center gap-2 px-1">
+                    <div class="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center font-black text-sm text-white shadow-inner">👤</div>
+                    <div class="text-xs font-bold text-gray-300">Hello, <span class="text-purple-400 block font-black text-sm">Người Ôn Tập</span></div>
+                </div>
+                <button type="button" id="btn-go-to-setup" class="w-full btn-quizizz-purple py-3 px-4 rounded-xl font-extrabold text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2 shadow-md">
                     🛠️ QUẢN LÝ / NẠP FILE ĐỀ
                 </button>
             </div>
         </div>
 
+        <div class="block md:hidden px-1">
+            <input type="text" id="search-topic-input-mobile" placeholder="🔍 Find a quiz or topic..." class="w-full bg-[#140826] border border-purple-900/40 rounded-xl px-4 py-3 text-xs text-purple-300 focus:outline-none">
+        </div>
+
+        <div id="recent-activity-row" class="space-y-3 hidden">
+            <h3 class="text-xs font-black text-pink-400 uppercase tracking-widest px-1 flex items-center gap-1.5">
+                <span>⏱️ Recent Activity (Hoạt động gần đây)</span>
+            </h3>
+            <div id="recent-activity-zone" class="overflow-x-auto hide-scrollbar flex flex-row gap-4 py-1">
+                </div>
+        </div>
+
         <div class="space-y-4">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-1">
-                <h2 class="text-sm font-black text-purple-300 uppercase tracking-widest flex items-center gap-2">
-                    <span>📚 Thư viện danh mục ôn tập</span>
-                    <span class="text-[10px] bg-purple-950 px-2 py-0.5 rounded-full text-purple-400 border border-purple-900/40" id="topic-count-badge">0 chủ đề</span>
-                </h2>
-                <input type="text" id="search-topic-input" oninput="filterDashboardTopics()" placeholder="🔍 Tìm kiếm nhanh chủ đề học tập..." class="bg-[#1a0b30] border border-purple-900/40 rounded-xl px-3 py-1.5 text-xs text-purple-300 focus:outline-none focus:border-purple-500 max-w-xs w-full">
-            </div>
+            <h2 class="text-sm font-black text-purple-300 uppercase tracking-widest flex items-center gap-2 px-1">
+                <span>📚 Featured Subject Categories</span>
+                <span class="text-[10px] bg-purple-950 px-2 py-0.5 rounded-full text-purple-400 border border-purple-900/40" id="topic-count-badge">0 chủ đề</span>
+            </h2>
             
             <div id="dynamic-topics-zone" class="space-y-5">
                 </div>
@@ -151,7 +167,7 @@
                     <span class="text-xs font-extrabold text-purple-400 tracking-wide uppercase flex items-center gap-1">
                         🤖 Trợ lý bóc tách đề đa danh mục qua Gemini
                     </span>
-                    <button type="button" onclick="copyAiPromptToClipboard()" id="copy-prompt-btn" class="bg-purple-950 hover:bg-purple-900 border border-purple-700 text-purple-300 font-extrabold text-[10px] sm:text-xs px-3 py-1.5 rounded-xl transition-all active:scale-90 shadow-md">
+                    <button type="button" id="copy-prompt-btn" class="bg-purple-950 hover:bg-purple-900 border border-purple-700 text-purple-300 font-extrabold text-[10px] sm:text-xs px-3 py-1.5 rounded-xl transition-all active:scale-90 shadow-md">
                         📋 Sao chép lệnh AI
                     </button>
                 </div>
@@ -184,11 +200,11 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
             </div>
 
             <div class="grid grid-cols-3 gap-3 pt-1">
-                <button type="button" onclick="backToDashboardHome()" class="col-span-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 py-3.5 rounded-xl font-bold text-xs uppercase active:scale-95 transition-all">
-                    🏠 Quay Lại
+                <button type="button" id="btn-setup-cancel" class="col-span-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 py-3.5 rounded-xl font-bold text-xs uppercase active:scale-95 transition-all">
+                    Cancel
                 </button>
-                <button type="button" onclick="processAndLoadDatabase()" class="col-span-2 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:brightness-110 py-3.5 rounded-xl font-black text-sm sm:text-base tracking-widest uppercase shadow-lg active:scale-95 transition-all">
-                    NẠP ĐỀ & LƯU KHO VĨNH VIỄN ⚡
+                <button type="button" id="btn-setup-save" class="col-span-2 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:brightness-110 py-3.5 rounded-xl font-black text-sm sm:text-base tracking-widest uppercase shadow-lg active:scale-95 transition-all">
+                    NẠP ĐỀ CHỦ ĐỀ MỚI ⚡
                 </button>
             </div>
         </div>
@@ -204,7 +220,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
             <div id="lobby-player-list" class="space-y-2 max-h-48 overflow-y-auto pr-1"></div>
         </div>
         <div id="host-action-zone" class="hidden">
-            <button type="button" onclick="broadCastStartGame()" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 py-4 rounded-xl font-black text-lg uppercase active:scale-95 transition-all">
+            <button type="button" id="btn-host-start" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 py-4 rounded-xl font-black text-lg uppercase active:scale-95 transition-all">
                 BẮT ĐẦU TRẬN ĐẤU 🔥
             </button>
         </div>
@@ -212,8 +228,8 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
             ⏳ Đang chờ chủ phòng bấm nút phát lệnh xuất phát...
         </div>
         <div class="mt-4 pt-4 border-t border-purple-950">
-            <button type="button" onclick="backToDashboardHome()" class="w-full bg-slate-950 text-gray-500 font-bold py-2 rounded-xl text-xs transition-all">
-                🏃‍♂️ Hủy kết nối / Quay về trang chủ
+            <button type="button" id="btn-lobby-exit" class="w-full bg-slate-950 text-gray-500 font-bold py-2 rounded-xl text-xs transition-all">
+                🏃‍♂️ Rời phòng chờ
             </button>
         </div>
     </div>
@@ -234,10 +250,10 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
                         <span id="streak-count" class="font-black text-yellow-400 text-[10px]">STREAK X0</span>
                     </div>
                     <div class="flex items-center gap-1.5 shrink-0">
-                        <button type="button" id="pause-btn" onclick="togglePauseGame()" class="bg-purple-900/60 hover:bg-purple-800 border border-purple-700/60 px-2.5 py-1.5 rounded-xl text-[10px] font-black text-purple-200 transition-all active:scale-90 hidden">
+                        <button type="button" id="pause-btn" class="bg-purple-900/60 hover:bg-purple-800 border border-purple-700/60 px-2.5 py-1.5 rounded-xl text-[10px] font-black text-purple-200 transition-all active:scale-90 hidden">
                             ⏸ Tạm dừng
                         </button>
-                        <button type="button" onclick="backToDashboardHome()" class="bg-red-950/60 hover:bg-red-800 border border-red-900 px-2.5 py-1 rounded-xl text-[10px] font-black text-red-200 transition-all active:scale-90">
+                        <button type="button" id="btn-game-exit" class="bg-red-950/60 hover:bg-red-800 border border-red-900 px-2.5 py-1 rounded-xl text-[10px] font-black text-red-200 transition-all active:scale-90">
                             🚪 Thoát
                         </button>
                     </div>
@@ -250,19 +266,19 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-auto">
-                    <button type="button" onclick="handleOptionClick(0)" id="opt-0" class="bg-[#2f6dae] p-4 sm:p-5 rounded-xl sm:rounded-2xl text-left font-extrabold text-sm sm:text-lg border-b-4 border-[#1a416b] min-h-[65px] sm:min-h-[85px] flex items-center transition-all active:scale-[0.97]">
+                    <button type="button" id="opt-0" class="bg-[#2f6dae] p-4 sm:p-5 rounded-xl sm:rounded-2xl text-left font-extrabold text-sm sm:text-lg border-b-4 border-[#1a416b] min-h-[65px] sm:min-h-[85px] flex items-center transition-all active:scale-[0.97]">
                         <span class="bg-black/20 w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center mr-3 sm:mr-4 text-xs font-black shadow-inner shrink-0">▲</span>
                         <span id="text-opt-0" class="w-full break-words line-clamp-2">Phương án 1</span>
                     </button>
-                    <button type="button" onclick="handleOptionClick(1)" id="opt-1" class="bg-[#2d9da6] p-4 sm:p-5 rounded-xl sm:rounded-2xl text-left font-extrabold text-sm sm:text-lg border-b-4 border-[#185e64] min-h-[65px] sm:min-h-[85px] flex items-center transition-all active:scale-[0.97]">
+                    <button type="button" id="opt-1" class="bg-[#2d9da6] p-4 sm:p-5 rounded-xl sm:rounded-2xl text-left font-extrabold text-sm sm:text-lg border-b-4 border-[#185e64] min-h-[65px] sm:min-h-[85px] flex items-center transition-all active:scale-[0.97]">
                         <span class="bg-black/20 w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center mr-3 sm:mr-4 text-xs font-black shadow-inner shrink-0">■</span>
                         <span id="text-opt-1" class="w-full break-words line-clamp-2">Phương án 2</span>
                     </button>
-                    <button type="button" onclick="handleOptionClick(2)" id="opt-2" class="bg-[#d97706] p-4 sm:p-5 rounded-xl sm:rounded-2xl text-left font-extrabold text-sm sm:text-lg border-b-4 border-[#92400e] min-h-[65px] sm:min-h-[85px] flex items-center transition-all active:scale-[0.97]">
+                    <button type="button" id="opt-2" class="bg-[#d97706] p-4 sm:p-5 rounded-xl sm:rounded-2xl text-left font-extrabold text-sm sm:text-lg border-b-4 border-[#92400e] min-h-[65px] sm:min-h-[85px] flex items-center transition-all active:scale-[0.97]">
                         <span class="bg-black/20 w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center mr-3 sm:mr-4 text-xs font-black shadow-inner shrink-0">●</span>
                         <span id="text-opt-2" class="w-full break-words line-clamp-2">Phương án 3</span>
                     </button>
-                    <button type="button" onclick="handleOptionClick(3)" id="opt-3" class="bg-[#bc2863] p-4 sm:p-5 rounded-xl sm:rounded-2xl text-left font-extrabold text-sm sm:text-lg border-b-4 border-[#7a143d] min-h-[65px] sm:min-h-[85px] flex items-center transition-all active:scale-[0.97]">
+                    <button type="button" id="opt-3" class="bg-[#bc2863] p-4 sm:p-5 rounded-xl sm:rounded-2xl text-left font-extrabold text-sm sm:text-lg border-b-4 border-[#7a143d] min-h-[65px] sm:min-h-[85px] flex items-center transition-all active:scale-[0.97]">
                         <span class="bg-black/20 w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center mr-3 sm:mr-4 text-xs font-black shadow-inner shrink-0">◆</span>
                         <span id="text-opt-3" class="w-full break-words line-clamp-2">Phương án 4</span>
                     </button>
@@ -283,10 +299,10 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
                         <h3 class="text-xl font-black mb-2 text-purple-400 uppercase tracking-wider">ĐÃ TẠM DỪNG</h3>
                         <p class="text-xs text-gray-400 mb-6">Trục đếm ngược đã đóng băng an toàn. Hãy nghỉ tay một chút nhé!</p>
                         <div class="space-y-3">
-                            <button type="button" onclick="togglePauseGame()" class="w-full btn-quizizz-purple py-3 rounded-xl font-black text-sm uppercase shadow-md">
+                            <button type="button" id="btn-pause-resume" class="w-full btn-quizizz-purple py-3 rounded-xl font-black text-sm uppercase shadow-md">
                                 ▶️ Tiếp tục ôn tập
                             </button>
-                            <button type="button" onclick="backToDashboardHome()" class="w-full bg-slate-900 border border-slate-800 py-2.5 rounded-xl font-bold text-xs text-red-400 uppercase transition-all">
+                            <button type="button" id="btn-pause-exit" class="w-full bg-slate-900 border border-slate-800 py-2.5 rounded-xl font-bold text-xs text-red-400 uppercase transition-all">
                                 🏠 Rời trận về trang chủ
                             </button>
                         </div>
@@ -346,12 +362,12 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
                 <span class="text-xs bg-cyan-950 text-cyan-400 border border-cyan-800/60 px-3 py-1 rounded-xl font-bold uppercase tracking-wider">
                     Thẻ nhớ: <span id="flashcard-idx-txt">1/1</span>
                 </span>
-                <button type="button" onclick="backToDashboardHome()" class="text-xs font-bold text-gray-400 hover:text-white transition-all bg-slate-950 px-3 py-1.5 rounded-xl border border-white/5">
+                <button type="button" id="btn-flashcard-home-exit" class="text-xs font-bold text-gray-400 hover:text-white transition-all bg-slate-950 px-3 py-1.5 rounded-xl border border-white/5">
                     🏠 Về Home
                 </button>
             </div>
 
-            <div class="flashcard-box w-full my-8 cursor-pointer flex-1 flex items-stretch" onclick="rotateFlashcardCore()">
+            <div class="flashcard-box w-full my-8 cursor-pointer flex-1 flex items-stretch">
                 <div id="flashcard-trigger-inner" class="flashcard-inner w-full relative quizizz-input rounded-2xl border-4 border-purple-900/40 p-6 flex items-center justify-center text-center shadow-2xl">
                     
                     <div class="flashcard-front absolute inset-0 p-6 flex flex-col justify-between items-center">
@@ -376,7 +392,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
                     <span>Nhấp thẻ để kiểm tra</span>
                     <span>phản xạ của não bộ</span>
                 </div>
-                <button type="button" onclick="nextFlashcardSequence(event)" class="bg-gradient-to-r from-cyan-500 to-blue-600 py-3.5 px-4 rounded-xl font-black text-sm uppercase tracking-wider active:scale-95 transition-all shadow-md text-center">
+                <button type="button" id="btn-flashcard-next" class="bg-gradient-to-r from-cyan-500 to-blue-600 py-3.5 px-4 rounded-xl font-black text-sm uppercase tracking-wider active:scale-95 transition-all shadow-md text-center">
                     CÂU TIẾP THEO ➡️
                 </button>
             </div>
@@ -409,10 +425,10 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
-            <button type="button" onclick="backToDashboardHome()" class="w-full bg-slate-900 hover:bg-slate-800 border border-slate-800 py-3 rounded-xl font-bold uppercase text-xs transition-all active:scale-95">
+            <button type="button" id="btn-result-home" class="w-full bg-slate-900 hover:bg-slate-800 border border-slate-800 py-3 rounded-xl font-bold uppercase text-xs transition-all active:scale-95">
                 🏠 Về bảng điều khiển
             </button>
-            <button type="button" onclick="window.location.reload()" class="w-full bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 hover:brightness-110 py-3 rounded-xl font-black uppercase transition-all active:scale-95">
+            <button type="button" id="btn-result-reload" class="w-full bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 hover:brightness-110 py-3 rounded-xl font-black uppercase transition-all active:scale-95">
                 🔄 Ôn tập chủ đề mới
             </button>
         </div>
@@ -439,6 +455,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
         
         let wrongQuestionsLog = [];
         let networkPlayers = {};
+        let activeTopicPlayingName = "";
 
         let audioCtx = null;
 
@@ -543,7 +560,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
         }
 
         // ========================================================
-        // PHẦN 2: KẾT XUẤT DANH MỤC ROW CHỦ ĐỀ CHUẨN WAYGROUND
+        // PHẦN 2: KẾT XUẤT DANH MỤC ROW CHỦ ĐỀ AN TOÀN CHỐNG ĐƠ CẢM ỨNG
         // ========================================================
         function renderDashboardTopics() {
             const container = document.getElementById('dynamic-topics-zone');
@@ -570,52 +587,126 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
                 const quizCount = globalDatabase[topic].length;
                 const randomColor = themeColors[idx % themeColors.length];
 
+                // Thiết lập Card Row
                 const sectionRow = document.createElement('div');
                 sectionRow.className = "space-y-3 bg-[#170a27]/50 border border-white/5 p-4 rounded-2xl topic-row-card animate__animated animate__fadeInUp";
                 sectionRow.setAttribute('data-topic-name', topic.toLowerCase());
                 
-                const safeTopicToken = encodeURIComponent(topic);
+                // Nội dung Tiêu đề
+                const titleDiv = document.createElement('div');
+                titleDiv.className = "flex items-center justify-between px-1";
+                titleDiv.innerHTML = `
+                    <span class="font-extrabold text-xs sm:text-sm uppercase text-purple-300 tracking-wider flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full ${randomColor}"></span>
+                        ${topic}
+                    </span>
+                `;
+                sectionRow.appendChild(titleDiv);
 
-                sectionRow.innerHTML = `
-                    <div class="flex items-center justify-between px-1">
-                        <span class="font-extrabold text-xs sm:text-sm uppercase text-purple-300 tracking-wider flex items-center gap-2">
-                            <span class="w-2.5 h-2.5 rounded-full ${randomColor}"></span>
-                            ${topic}
-                        </span>
+                // Thanh trượt ngang chứa các thẻ bài (Carousel)
+                const scrollWrapper = document.createElement('div');
+                scrollWrapper.className = "overflow-x-auto hide-scrollbar flex flex-row gap-4 py-1";
+
+                // Thẻ 1: Luyện tập trắc nghiệm
+                const card1 = document.createElement('div');
+                card1.className = "bg-[#1d0d33] border border-purple-500/10 rounded-xl p-4 min-w-[200px] max-w-[200px] flex flex-col justify-between items-start cursor-pointer hover:border-purple-500/40 transition-all active:scale-95 shrink-0 shadow-md";
+                card1.innerHTML = `
+                    <div class="w-10 h-10 rounded-xl ${randomColor} flex items-center justify-center text-white/70 text-lg font-bold mb-4 shadow-inner">📝</div>
+                    <div class="w-full">
+                        <div class="text-[10px] text-cyan-400 font-bold uppercase tracking-wider mb-0.5">${quizCount} Câu hỏi</div>
+                        <h4 class="font-black text-sm text-white truncate w-full">Luyện tập tổng hợp</h4>
+                        <p class="text-[10px] text-gray-500 mt-2">Chạy thần tốc không chờ</p>
                     </div>
-                    <div class="overflow-x-auto hide-scrollbar flex flex-row gap-4 py-1">
-                        <div onclick="startSinglePracticeRound(decodeURIComponent('${safeTopicToken}'))" class="bg-[#1d0d33] border border-purple-500/10 rounded-xl p-4 min-w-[200px] max-w-[200px] flex flex-col justify-between items-start cursor-pointer hover:border-purple-500/40 transition-all active:scale-95 shrink-0 shadow-md">
-                            <div class="w-10 h-10 rounded-xl ${randomColor} flex items-center justify-center text-white/70 text-lg font-bold mb-4 shadow-inner">📝</div>
-                            <div class="w-full">
-                                <div class="text-[10px] text-cyan-400 font-bold uppercase tracking-wider mb-0.5">${quizCount} Câu hỏi</div>
-                                <h4 class="font-black text-sm text-white truncate w-full">Luyện tập tổng hợp</h4>
-                                <p class="text-[10px] text-gray-500 mt-2">Chạy thần tốc không chờ</p>
-                            </div>
+                `;
+                card1.addEventListener('click', () => startSinglePracticeRound(topic));
+
+                // Thẻ 2: Học Flashcard
+                const card2 = document.createElement('div');
+                card2.className = "bg-[#1d0d33] border border-cyan-500/10 rounded-xl p-4 min-w-[200px] max-w-[200px] flex flex-col justify-between items-start cursor-pointer hover:border-cyan-500/40 transition-all active:scale-95 shrink-0 shadow-md";
+                card2.innerHTML = `
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center text-white/70 text-lg font-bold mb-4 shadow-inner">🎴</div>
+                    <div class="w-full">
+                        <div class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider mb-0.5">Active Recall</div>
+                        <h4 class="font-black text-sm text-white truncate w-full">Học thẻ Flashcard</h4>
+                        <p class="text-[10px] text-gray-500 mt-2">Lật mặt ghi nhớ kiến thức</p>
+                    </div>
+                `;
+                card2.addEventListener('click', () => startFlashcardRound(topic));
+
+                // Thẻ 3: Mở phòng thi đấu mạng
+                const card3 = document.createElement('div');
+                card3.className = "bg-[#1d0d33] border border-pink-500/10 rounded-xl p-4 min-w-[200px] max-w-[200px] flex flex-col justify-between items-start cursor-pointer hover:border-pink-500/40 transition-all active:scale-95 shrink-0 shadow-md";
+                card3.innerHTML = `
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 flex items-center justify-center text-white/70 text-lg font-bold mb-4 shadow-inner">👑</div>
+                    <div class="w-full">
+                        <div class="text-[10px] text-pink-400 font-bold uppercase tracking-wider mb-0.5">Realtime Room</div>
+                        <h4 class="font-black text-sm text-white truncate w-full">Mở Phòng Đấu Mạng</h4>
+                        <p class="text-[10px] text-gray-500 mt-2">Thi đấu mạng cùng bạn bè</p>
+                    </div>
+                `;
+                card3.addEventListener('click', () => startMultiplayerHostSession(topic));
+
+                // Lắp ráp các khối thẻ bài học vào giao diện chính
+                scrollWrapper.appendChild(card1);
+                scrollWrapper.appendChild(card2);
+                scrollWrapper.appendChild(card3);
+                sectionRow.appendChild(scrollWrapper);
+                container.appendChild(sectionRow);
+            });
+            
+            renderRecentActivityRow();
+        }
+
+        function renderRecentActivityRow() {
+            const rowContainer = document.getElementById('recent-activity-row');
+            const zone = document.getElementById('recent-activity-zone');
+            if (!rowContainer || !zone) return;
+
+            const logsData = localStorage.getItem('wayground_recent_logs');
+            if (!logsData) { rowContainer.classList.add('hidden'); return; }
+
+            const logs = JSON.parse(logsData);
+            if (logs.length === 0) { rowContainer.classList.add('hidden'); return; }
+
+            rowContainer.classList.remove('hidden');
+            zone.innerHTML = '';
+
+            logs.forEach(log => {
+                let badgeColor = "bg-red-600"; let statusLabel = "poor";
+                if (log.accuracy >= 90) { badgeColor = "bg-emerald-600"; statusLabel = "perfect"; }
+                else if (log.accuracy >= 70) { badgeColor = "bg-purple-600"; statusLabel = "great"; }
+                else if (log.accuracy >= 40) { badgeColor = "bg-amber-600"; statusLabel = "average"; }
+
+                const card = document.createElement('div');
+                card.className = "bg-[#160a27]/90 border border-white/10 p-4 rounded-xl min-w-[240px] max-w-[240px] shrink-0 flex flex-col justify-between font-bold text-xs shadow-md";
+                card.innerHTML = `
+                    <div>
+                        <div class="text-[10px] text-gray-500 uppercase tracking-wider mb-1">${log.time}</div>
+                        <h4 class="text-sm font-black text-white truncate mb-2">${log.topic}</h4>
+                    </div>
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between items-center text-[10px]">
+                            <span class="text-gray-400">Độ chính xác:</span>
+                            <span class="text-yellow-400 font-black">${log.accuracy}% (${statusLabel})</span>
                         </div>
-                        <div onclick="startFlashcardRound(decodeURIComponent('${safeTopicToken}'))" class="bg-[#1d0d33] border border-cyan-500/10 rounded-xl p-4 min-w-[200px] max-w-[200px] flex flex-col justify-between items-start cursor-pointer hover:border-cyan-500/40 transition-all active:scale-95 shrink-0 shadow-md">
-                            <div class="w-10 h-10 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center text-white/70 text-lg font-bold mb-4 shadow-inner">🎴</div>
-                            <div class="w-full">
-                                <div class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider mb-0.5">Active Recall</div>
-                                <h4 class="font-black text-sm text-white truncate w-full">Học thẻ Flashcard</h4>
-                                <p class="text-[10px] text-gray-500 mt-2">Lật mặt ghi nhớ kiến thức</p>
-                            </div>
-                        </div>
-                        <div onclick="startMultiplayerHostSession(decodeURIComponent('${safeTopicToken}'))" class="bg-[#1d0d33] border border-pink-500/10 rounded-xl p-4 min-w-[200px] max-w-[200px] flex flex-col justify-between items-start cursor-pointer hover:border-pink-500/40 transition-all active:scale-95 shrink-0 shadow-md">
-                            <div class="w-10 h-10 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 flex items-center justify-center text-white/70 text-lg font-bold mb-4 shadow-inner">👑</div>
-                            <div class="w-full">
-                                <div class="text-[10px] text-pink-400 font-bold uppercase tracking-wider mb-0.5">Realtime Room</div>
-                                <h4 class="font-black text-sm text-white truncate w-full">Mở Phòng Đấu Mạng</h4>
-                                <p class="text-[10px] text-gray-500 mt-2">Thi đấu mạng cùng bạn bè</p>
-                            </div>
+                        <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden">
+                            <div class="${badgeColor} h-full rounded-full" style="width: ${log.accuracy}%"></div>
                         </div>
                     </div>
                 `;
-                container.appendChild(sectionRow);
+                zone.appendChild(card);
             });
         }
 
         function filterDashboardTopics() {
             const val = document.getElementById('search-topic-input').value.toLowerCase().trim();
+            executeFilteringLogic(val);
+        }
+        function filterDashboardTopicsMobile() {
+            const val = document.getElementById('search-topic-input-mobile').value.toLowerCase().trim();
+            executeFilteringLogic(val);
+        }
+        function executeFilteringLogic(val) {
             const rows = document.querySelectorAll('.topic-row-card');
             rows.forEach(row => {
                 const name = row.getAttribute('data-topic-name');
@@ -629,6 +720,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
         // ========================================================
         function startSinglePracticeRound(topicName) {
             gameMode = 'single'; isHost = false;
+            activeTopicPlayingName = topicName;
             let rawQuestions = globalDatabase[topicName];
             if (!rawQuestions) return;
             questions = JSON.parse(JSON.stringify(rawQuestions));
@@ -879,6 +971,17 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
             document.getElementById('summary-accuracy').innerText = `${ratio}%`;
             document.getElementById('final-rank-txt').innerText = gameMode === 'single' ? "HOÀN THÀNH" : `#${calculateFinalNetRank()}`;
 
+            if (gameMode === 'single' && activeTopicPlayingName) {
+                let logs = [];
+                const existing = localStorage.getItem('wayground_recent_logs');
+                if (existing) logs = JSON.parse(existing);
+                const now = new Date();
+                const timeString = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')} - ${now.getDate()}/${now.getMonth()+1}`;
+                logs.unshift({ topic: activeTopicPlayingName, accuracy: ratio, time: timeString });
+                if (logs.length > 5) logs.pop();
+                localStorage.setItem('wayground_recent_logs', JSON.stringify(logs));
+            }
+
             const reviewZone = document.getElementById('mistake-review-zone');
             const container = document.getElementById('mistake-list-container');
             container.innerHTML = '';
@@ -1045,6 +1148,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
             
             const dash = document.getElementById('dashboard-screen');
             if (dash) { dash.classList.remove('hidden'); }
+            renderDashboardTopics();
         }
 
         function shuffleArray(arr) { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } }
@@ -1071,25 +1175,38 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
             }
         }
 
-        // BẢO VỆ CHỐNG CRASH VÀ KHỞI TẠO CACHE AN TOÀN TUYỆT ĐỐI
+        // BIÊN TẬP SỰ KIỆN QUA THAM CHIẾU BỘ NHỚ AN TOÀN TUYỆT ĐỐI (ZERO-FREEZE ENGINE)
         document.addEventListener("DOMContentLoaded", function() {
+            // Gán sự kiện cho Header Logo
+            document.getElementById('nav-logo-home').addEventListener('click', backToDashboardHome);
+            
+            // Gán sự kiện mở Trình cài đặt đề
+            document.getElementById('btn-go-to-setup').addEventListener('click', () => switchScreen('dashboard-screen', 'setup-screen'));
+            
+            // Gán sự kiện cho Trình cài đặt
+            document.getElementById('btn-setup-cancel').addEventListener('click', backToDashboardHome);
+            document.getElementById('btn-setup-save').addEventListener('click', processAndLoadDatabase);
+            
+            // Gán sự kiện phòng chờ và kết quả
+            document.getElementById('btn-join-room-trigger').addEventListener('click', joinRoomAsPlayer);
+            document.getElementById('btn-host-start').addEventListener('click', broadCastStartGame);
+            document.getElementById('btn-lobby-exit').addEventListener('click', backToDashboardHome);
+            document.getElementById('btn-pause-resume').addEventListener('click', togglePauseGame);
+            document.getElementById('btn-pause-exit').addEventListener('click', backToDashboardHome);
+            document.getElementById('btn-flashcard-home-exit').addEventListener('click', backToDashboardHome);
+            document.getElementById('btn-flashcard-next').addEventListener('click', nextFlashcardSequence);
+            document.getElementById('btn-result-home').addEventListener('click', backToDashboardHome);
+            document.getElementById('btn-result-reload').addEventListener('click', () => window.location.reload());
+
             try {
                 const savedDb = localStorage.getItem('wayground_ultimate_db');
                 const savedRaw = localStorage.getItem('wayground_raw_input');
                 
                 if (savedDb && savedRaw) {
                     globalDatabase = JSON.parse(savedDb);
-                    
                     if (typeof globalDatabase !== 'object' || globalDatabase === null || Array.isArray(globalDatabase)) {
-                        throw new Error("Phát hiện cấu trúc đệm cũ.");
+                        throw new Error("Phát hiện đệm cũ lỗi.");
                     }
-                    
-                    for (let key in globalDatabase) {
-                        if (!Array.isArray(globalDatabase[key])) {
-                            throw new Error("Dữ liệu danh mục không khớp.");
-                        }
-                    }
-
                     const bulkInputEl = document.getElementById('bulk-input');
                     if (bulkInputEl) bulkInputEl.value = savedRaw;
                     renderDashboardTopics();
@@ -1097,7 +1214,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
                     forceLoadDefaultFactorySettings();
                 }
             } catch (e) {
-                console.warn("Dọn dẹp xung đột LocalStorage cũ thành công:", e);
+                console.warn("Reset đệm lỗi thành công:", e);
                 localStorage.removeItem('wayground_ultimate_db');
                 localStorage.removeItem('wayground_raw_input');
                 forceLoadDefaultFactorySettings();
