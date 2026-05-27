@@ -451,7 +451,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
         let questions = [];      
         let currentIdx = 0;      let playerScore = 0;    let currentStreak = 0;
         let correctAnswersCount = 0;                     let wrongAnswersCount = 0;
-        let canAnswer = false;   let currentElapsedMs = 0; let singleTimeLeft = 15;
+        let canAnswer = false;   let currentElapsedMs = 0;
         
         let wrongQuestionsLog = [];
         let networkPlayers = {};
@@ -505,15 +505,58 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
             if (newEl) newEl.classList.remove('hidden');
         }
 
+        // CƠ CHẾ SAO CHÉP PROMPT DỰ PHÒNG ĐA NỀN TẢNG (CHỐNG TREO SAFARI IPHONE)
         function copyAiPromptToClipboard() {
             const promptText = `Hãy biên soạn cho tôi một bộ đề gồm nhiều câu trắc nghiệm thuộc các lĩnh vực khác nhau. Mỗi câu hỏi nằm trên một dòng duy nhất, không có số thứ tự câu ở đầu dòng, phân tách các cột bằng dấu gạch đứng "|". Định dạng chính xác từng dòng: Tên chủ đề | Câu hỏi | Đáp án 1 | Đáp án 2 | Đáp án 3 | Đáp án 4 | Số đáp án đúng (từ 1 đến 4). Ví dụ: Mathematics | Hình tam giác có tổng ba góc bằng bao nhiêu độ? | 90 độ | 180 độ | 360 độ | 60 độ | 2`;
-            navigator.clipboard.writeText(promptText).then(() => {
-                const btn = document.getElementById('copy-prompt-btn');
-                if (btn) {
-                    btn.innerText = "✓ Đã sao chép! 📋";
-                    setTimeout(() => { btn.innerText = "📋 Sao chép lệnh AI"; }, 2500);
-                }
-            });
+            
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(promptText).then(() => {
+                    handleCopySuccessVisual();
+                }).catch(() => {
+                    executeFallbackCopyCore(promptText);
+                });
+            } else {
+                executeFallbackCopyCore(promptText);
+            }
+        }
+
+        function executeFallbackCopyCore(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed"; 
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.width = "2in";
+            textArea.style.height = "2in";
+            textArea.style.padding = "0";
+            textArea.style.border = "none";
+            textArea.style.outline = "none";
+            textArea.style.boxShadow = "none";
+            textArea.style.background = "transparent";
+            
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                handleCopySuccessVisual();
+            } catch (err) {
+                alert('Trình duyệt chặn quyền tự động sao chép. Vui lòng copy thủ công.');
+            }
+            document.body.removeChild(textArea);
+        }
+
+        function handleCopySuccessVisual() {
+            const btn = document.getElementById('copy-prompt-btn');
+            if (btn) {
+                btn.innerText = "✓ Đã sao chép! 📋";
+                btn.classList.add('bg-emerald-800', 'text-emerald-200');
+                setTimeout(() => { 
+                    btn.innerText = "📋 Sao chép lệnh AI"; 
+                    btn.classList.remove('bg-emerald-800', 'text-emerald-200');
+                }, 2500);
+            }
         }
 
         // ========================================================
@@ -833,6 +876,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
         }
 
         let timerInterval = null;
+        let singleTimeLeft = 15;
         function runSingleTimerCore() {
             clearInterval(timerInterval);
             const totalMs = TIME_LIMIT_PER_QUESTION_SEC * 1000;
@@ -1184,6 +1228,12 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
             document.getElementById('btn-result-reload').addEventListener('click', () => window.location.reload());
             document.getElementById('mute-btn').addEventListener('click', toggleAudioMute);
             
+            // SỬA LỖI ĐƠ: KÍCH HOẠT SỰ KIỆN SAO CHÉP PROMPT AI CHO CẢ PC VÀ SMARTPHONE
+            document.getElementById('copy-prompt-btn').addEventListener('click', copyAiPromptToClipboard);
+
+            // SỬA LỖI ĐƠ: KÍCH HOẠT NÚT TẠM DỪNG TRẬN ĐẤU GÓC HUD GAME SCREEN
+            document.getElementById('pause-btn').addEventListener('click', togglePauseGame);
+
             // KÍCH HOẠT SỰ KIỆN CHẠM LẬT THẺ CHUẨN XÁC V6.2
             document.getElementById('flashcard-trigger-inner').addEventListener('click', rotateFlashcardCore);
 
