@@ -50,49 +50,58 @@ const SCREEN_ACTIVE_CLASS = 'active';
 const SCREEN_ENTER_CLASS = 'screen-enter';
 
 /**
+ * List of all screen IDs
+ */
+const ALL_SCREENS = [
+  'dashboard-screen',
+  'setup-screen',
+  'lobby-screen',
+  'game-screen',
+  'flashcard-screen',
+  'result-screen'
+];
+
+/**
  * Transition from one screen to another.
- * Hides `oldId`, shows `newId` with an entry animation.
  *
- * @param {string} oldId — ID of the screen element to hide.
- * @param {string} newId — ID of the screen element to show.
+ * @param {string} oldId
+ * @param {string} newId
  */
 export function switchScreen(oldId, newId) {
-  const oldEl = $(oldId);
-  const newEl = $(newId);
+  const oldEl = oldId ? $(oldId) : null;
+  const newEl = newId ? $(newId) : null;
 
   if (oldEl) {
-    oldEl.classList.remove(SCREEN_ACTIVE_CLASS);
+    oldEl.classList.add('hidden');
   }
 
   if (newEl) {
-    newEl.classList.add(SCREEN_ACTIVE_CLASS);
-    // Trigger enter animation
+    newEl.classList.remove('hidden');
     newEl.classList.remove(SCREEN_ENTER_CLASS);
-    // Force reflow so the re-add actually triggers the animation
     void newEl.offsetWidth;
     newEl.classList.add(SCREEN_ENTER_CLASS);
   }
 }
 
 /**
- * Hide every element with the class `screen`.
+ * Hide every screen element.
  */
 export function hideAllScreens() {
-  const screens = document.querySelectorAll('.screen');
-  for (let i = 0; i < screens.length; i++) {
-    screens[i].classList.remove(SCREEN_ACTIVE_CLASS);
-  }
+  ALL_SCREENS.forEach(id => {
+    const el = $(id);
+    if (el) el.classList.add('hidden');
+  });
 }
 
 /**
- * Show a specific screen by ID (does NOT hide others — call {@link hideAllScreens} first).
+ * Show a specific screen by ID.
  *
- * @param {string} id — Screen element ID.
+ * @param {string} id
  */
 export function showScreen(id) {
   const el = $(id);
   if (!el) return;
-  el.classList.add(SCREEN_ACTIVE_CLASS);
+  el.classList.remove('hidden');
   el.classList.remove(SCREEN_ENTER_CLASS);
   void el.offsetWidth;
   el.classList.add(SCREEN_ENTER_CLASS);
@@ -143,10 +152,10 @@ export function showModal({ emoji = '', title = '', message = '', buttons, onClo
   }
 
   // Build content
-  const emojiEl = modal.querySelector('.modal-emoji') || modal.querySelector('[data-modal-emoji]');
-  const titleEl = modal.querySelector('.modal-title') || modal.querySelector('[data-modal-title]');
-  const messageEl = modal.querySelector('.modal-message') || modal.querySelector('[data-modal-message]');
-  const buttonsContainer = modal.querySelector('.modal-buttons') || modal.querySelector('[data-modal-buttons]');
+  const emojiEl = modal.querySelector('.modal-emoji') || modal.querySelector('#modal-emoji');
+  const titleEl = modal.querySelector('.modal-title') || modal.querySelector('#modal-title');
+  const messageEl = modal.querySelector('.modal-message') || modal.querySelector('#modal-message');
+  const buttonsContainer = modal.querySelector('.modal-actions') || modal.querySelector('#modal-actions');
 
   if (emojiEl) emojiEl.textContent = emoji;
   if (titleEl) titleEl.textContent = title;
@@ -173,7 +182,7 @@ export function showModal({ emoji = '', title = '', message = '', buttons, onClo
   _modalOnClose = typeof onClose === 'function' ? onClose : null;
 
   // Show
-  modal.classList.add(SCREEN_ACTIVE_CLASS);
+  modal.classList.remove('hidden');
 
   return new Promise((resolve) => {
     _modalResolve = resolve;
@@ -184,7 +193,14 @@ export function showModal({ emoji = '', title = '', message = '', buttons, onClo
  * Hide the custom modal.
  */
 export function hideModal() {
-  _dismissModal(-1);
+  const modal = $('custom-modal');
+  if (modal) {
+    modal.classList.add('hidden');
+  }
+  if (_modalResolve) {
+    _modalResolve(-1);
+    _modalResolve = null;
+  }
 }
 
 /**
@@ -193,7 +209,7 @@ export function hideModal() {
  */
 function _dismissModal(buttonIndex) {
   const modal = $('custom-modal');
-  if (modal) modal.classList.remove(SCREEN_ACTIVE_CLASS);
+  if (modal) modal.classList.add('hidden');
 
   if (_modalResolve) {
     _modalResolve(buttonIndex);

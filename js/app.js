@@ -224,10 +224,16 @@ function parseQuizData(rawText) {
       !topicName ||
       !question ||
       options.some((o) => !o) ||
-      isNaN(correctIdx) ||
-      correctIdx < 0 ||
-      correctIdx > 3
+      isNaN(correctIdx)
     ) {
+      continue;
+    }
+    
+    // Map 1-4 to 0-3 if needed, or 0-3 directly
+    let finalIdx = correctIdx;
+    if (finalIdx >= 1 && finalIdx <= 4) {
+      finalIdx = finalIdx - 1;
+    } else if (finalIdx < 0 || finalIdx > 3) {
       continue;
     }
 
@@ -235,7 +241,7 @@ function parseQuizData(rawText) {
       db[topicName] = [];
     }
 
-    db[topicName].push({ question, options, correct: correctIdx });
+    db[topicName].push({ question, options, correct: finalIdx });
   }
 
   return db;
