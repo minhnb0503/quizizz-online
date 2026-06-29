@@ -102,7 +102,17 @@ function init() {
     /* Load persisted database */
     const savedDb = loadDatabase();
     if (savedDb && typeof savedDb === 'object') {
-      GameState.globalDatabase = savedDb;
+      // Handle corrupted nested db if it exists (legacy bug)
+      let actualDb = savedDb.db || savedDb;
+      while (actualDb && actualDb.db) {
+        actualDb = actualDb.db;
+      }
+      
+      // Clean up ghost keys if any
+      delete actualDb.rawText;
+      delete actualDb.db;
+      
+      GameState.globalDatabase = actualDb;
     }
 
     /* Load wrong-questions log */
@@ -166,7 +176,7 @@ function processAndLoadDatabase() {
     GameState.globalDatabase[topic] = parsed[topic];
   }
 
-  saveDatabase(GameState.globalDatabase);
+  saveDatabase(GameState.globalDatabase, rawText);
   renderDashboard();
   switchScreen(null, 'dashboard-screen');
 
@@ -431,7 +441,13 @@ function handleImport(event) {
       /* Reload database into GameState */
       const reloaded = loadDatabase();
       if (reloaded && typeof reloaded === 'object') {
-        GameState.globalDatabase = reloaded;
+        let actualDb = reloaded.db || reloaded;
+        while (actualDb && actualDb.db) {
+          actualDb = actualDb.db;
+        }
+        delete actualDb.rawText;
+        delete actualDb.db;
+        GameState.globalDatabase = actualDb;
       }
 
       initSpacedRepetition();
