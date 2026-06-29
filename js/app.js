@@ -141,15 +141,15 @@ function init() {
  * @private
  */
 function processAndLoadDatabase() {
-  const textarea = $('setup-data-textarea');
+  const textarea = $('bulk-input');
   if (!textarea) {
-    showModal('Lỗi', 'Không tìm thấy ô nhập liệu.');
+    showModal({ title: 'Lỗi', message: 'Không tìm thấy ô nhập liệu.' });
     return;
   }
 
   const rawText = textarea.value.trim();
   if (rawText.length === 0) {
-    showModal('Lỗi', 'Vui lòng dán dữ liệu câu hỏi vào ô nhập liệu.');
+    showModal({ title: 'Lỗi', message: 'Vui lòng dán dữ liệu câu hỏi vào ô nhập liệu.' });
     return;
   }
 
@@ -157,7 +157,7 @@ function processAndLoadDatabase() {
   const topicNames = Object.keys(parsed);
 
   if (topicNames.length === 0) {
-    showModal('Lỗi', 'Không thể phân tích dữ liệu. Hãy kiểm tra định dạng.');
+    showModal({ title: 'Lỗi', message: 'Không thể phân tích dữ liệu. Hãy kiểm tra định dạng.' });
     return;
   }
 
@@ -174,10 +174,10 @@ function processAndLoadDatabase() {
     (sum, t) => sum + parsed[t].length,
     0
   );
-  showModal(
-    'Thành công!',
-    `Đã tải ${totalQuestions} câu hỏi từ ${topicNames.length} chủ đề.`
-  );
+  showModal({
+    title: 'Thành công!',
+    message: `Đã tải ${totalQuestions} câu hỏi từ ${topicNames.length} chủ đề.`
+  });
 }
 
 /**
@@ -407,7 +407,7 @@ function handleExport() {
     triggerDownload(blob, filename);
   } catch (err) {
     console.error('[App] Export failed:', err);
-    showModal('Lỗi', 'Xuất dữ liệu thất bại.');
+    showModal({ title: 'Lỗi', message: 'Xuất dữ liệu thất bại.' });
   }
 }
 
@@ -438,15 +438,15 @@ function handleImport(event) {
       initStats();
       renderDashboard();
 
-      showModal('Thành công', 'Đã nhập dữ liệu thành công!');
+      showModal({ title: 'Thành công', message: 'Đã nhập dữ liệu thành công!' });
     } catch (err) {
       console.error('[App] Import failed:', err);
-      showModal('Lỗi', 'File không hợp lệ hoặc bị hỏng.');
+      showModal({ title: 'Lỗi', message: 'File không hợp lệ hoặc bị hỏng.' });
     }
   };
 
   reader.onerror = () => {
-    showModal('Lỗi', 'Không thể đọc file.');
+    showModal({ title: 'Lỗi', message: 'Không thể đọc file.' });
   };
 
   reader.readAsText(file);
