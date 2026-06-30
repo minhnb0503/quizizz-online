@@ -5,13 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Quizizz Ultimate Arena - Wayground Perfect Edition</title>
     
+    <!-- Cấu hình ứng dụng Web App chạy độc lập toàn màn hình chống trượt cuộn Safari trên iOS (iPhone 11 - 17 Pro Max) -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Wayground">
 
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Animate.css CDN cho các hiệu ứng hoạt họa và trượt mượt mà -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@600;800&display=swap" rel="stylesheet">
+    <!-- Paho MQTT Library cho cơ chế thi đấu mạng thời gian thực ổn định -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
     
     <style>
@@ -93,12 +98,14 @@
 </head>
 <body class="text-white flex flex-col justify-start items-center p-3 sm:p-4">
 
+    <!-- GLOBAL NAVBAR NAVIGATION (STYLING CHUẨN TỪ FILE MẪU) -->
     <header class="w-full max-w-5xl flex items-center justify-between py-3 px-4 bg-[#160a27]/90 border-b border-white/5 backdrop-blur-md rounded-2xl mb-4 z-40">
         <div class="flex items-center gap-3">
             <span id="nav-logo-home" class="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-400 to-cyan-400 tracking-tight cursor-pointer">
                 WAYGROUND
             </span>
         </div>
+        <!-- Thanh tìm kiếm tổng quát bộ đề giống hệ thống thực trên PC -->
         <div class="hidden md:block flex-1 max-w-md mx-6">
             <input type="text" id="search-topic-input" placeholder="Find a quiz or topic..." class="w-full bg-[#140826] border border-purple-900/40 rounded-xl px-4 py-2 text-xs text-purple-300 focus:outline-none focus:border-purple-500 transition-all">
         </div>
@@ -113,9 +120,12 @@
         </div>
     </header>
 
+    <!-- MÀN HÌNH CHÍNH 1: BẢNG ĐIỀU KHIỂN TRANG CHỦ (DASHBOARD) -->
     <main id="dashboard-screen" class="w-full max-w-5xl space-y-6 animate__animated animate__fadeIn">
         
+        <!-- KHU VỰC BỐ CỤC SONG SONG (SPLIT LAYOUT CHUẨN FILE GỐC) -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
+            <!-- Khung Trái: Nhập mã phòng đấu mạng -->
             <div class="md:col-span-2 quizizz-glass rounded-3xl p-4 sm:p-5 flex flex-col justify-center">
                 <div class="flex flex-col sm:flex-row gap-3 items-stretch w-full">
                     <input type="text" id="input-room-code" placeholder="Enter a join code..." class="flex-1 quizizz-input rounded-xl px-4 py-3.5 font-black text-lg text-yellow-400 focus:outline-none text-center sm:text-left">
@@ -124,6 +134,7 @@
                     </button>
                 </div>
             </div>
+            <!-- Khung Phải: Thông tin lời chào & Nút Quản lý nạp file -->
             <div class="quizizz-glass rounded-3xl p-4 flex flex-col justify-between gap-3">
                 <div class="flex items-center gap-2 px-1">
                     <div class="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center font-black text-sm text-white shadow-inner">👤</div>
@@ -135,37 +146,71 @@
             </div>
         </div>
 
+        <!-- THANH TÌM KIẾM DÀNH RIÊNG CHO THIẾT BỊ DI ĐỘNG (MOBILE ONLY SEARCH) -->
         <div class="block md:hidden px-1">
             <input type="text" id="search-topic-input-mobile" placeholder="🔍 Find a quiz or topic..." class="w-full bg-[#140826] border border-purple-900/40 rounded-xl px-4 py-3 text-xs text-purple-300 focus:outline-none">
         </div>
 
+        <!-- HÀNG "RECENT ACTIVITY" THEO DÕI TIẾN ĐỘ THỰC TẾ -->
         <div id="recent-activity-row" class="space-y-3 hidden">
             <h3 class="text-xs font-black text-pink-400 uppercase tracking-widest px-1 flex items-center gap-1.5">
                 <span>⏱️ Recent Activity (Hoạt động gần đây)</span>
             </h3>
             <div id="recent-activity-zone" class="overflow-x-auto hide-scrollbar flex flex-row gap-4 py-1">
-                </div>
+                <!-- Sẽ được đổ tự động qua JS -->
+            </div>
         </div>
 
+        <!-- THƯ VIỆN CÁC CHỦ ĐỀ HỌC TẬP CHUYÊN SÂU -->
         <div class="space-y-4">
             <h2 class="text-sm font-black text-purple-300 uppercase tracking-widest flex items-center gap-2 px-1">
                 <span>📚 Featured Subject Categories</span>
                 <span class="text-[10px] bg-purple-950 px-2 py-0.5 rounded-full text-purple-400 border border-purple-900/40" id="topic-count-badge">0 chủ đề</span>
             </h2>
             
+            <!-- Danh sách các hàng ngang chứa chủ đề kết xuất động -->
             <div id="dynamic-topics-zone" class="space-y-5">
-                </div>
+                <!-- Toàn bộ UI thẻ bài học sẽ được dựng an toàn ở đây -->
+            </div>
         </div>
     </main>
 
+    <!-- MÀN HÌNH CHÍNH 2: TRÌNH CÀI ĐẶT ĐỀ VÀ HỆ THỐNG ĐỒNG BỘ THIẾT BỊ REALTIME -->
     <div id="setup-screen" class="w-full max-w-2xl quizizz-glass rounded-3xl p-4 sm:p-7 hidden animate__animated animate__fadeIn">
         <h2 class="text-xl sm:text-2xl font-black text-cyan-400 mb-4 text-center uppercase tracking-wider">HỆ THỐNG QUẢN LÝ FILE ĐỀ THI</h2>
-        <div class="space-y-4">
+        <div class="space-y-5">
             
+            <!-- MODULE ĐỒNG BỘ KHÔNG DÂY TỐI ƯU CROSS-DEVICE (MỚI BIÊN SOẠN) -->
+            <div class="bg-purple-950/40 border border-purple-500/20 rounded-2xl p-4 space-y-3 shadow-inner">
+                <span class="text-xs font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-pink-400 uppercase tracking-widest block">
+                    🔄 ĐỒNG BỘ HOA ĐỀ KHÔNG DÂY (LAPTOP ⇆ ĐIỆN THOẠI)
+                </span>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
+                    <!-- Nhóm 1: Phát tín hiệu từ Laptop -->
+                    <div class="bg-[#120722] p-3 rounded-xl border border-purple-900/30 text-center">
+                        <span class="text-[10px] text-gray-400 block font-bold mb-1">MÁY GỬI (LAPTOP)</span>
+                        <button type="button" id="btn-sync-send-trigger" class="bg-purple-900 hover:bg-purple-800 px-3 py-1.5 rounded-lg text-xs font-black transition-all">
+                            Phát mã đồng bộ đề 📡
+                        </button>
+                        <div id="display-sync-code" class="text-2xl font-black text-yellow-400 tracking-widest mt-2">------</div>
+                        <div id="sync-status-text" class="text-[10px] text-purple-400 mt-1 italic">Chưa kích hoạt</div>
+                    </div>
+                    <!-- Nhóm 2: Nhận tín hiệu trên Điện thoại -->
+                    <div class="bg-[#120722] p-3 rounded-xl border border-purple-900/30 flex flex-col justify-between">
+                        <span class="text-[10px] text-gray-400 block font-bold text-center sm:text-left mb-1">MÁY NHẬN (ĐIỆN THOẠI)</span>
+                        <input type="text" id="input-sync-code" placeholder="Nhập mã 6 số từ laptop..." class="w-full bg-[#1c0c35] border border-purple-900 rounded-lg px-2.5 py-1.5 text-xs text-center font-black text-yellow-400 focus:outline-none mb-2">
+                        <button type="button" id="btn-sync-receive-trigger" class="w-full bg-cyan-600 hover:bg-cyan-500 py-1.5 rounded-lg text-xs font-black transition-all text-center">
+                            Nhận đề và lưu vĩnh viễn 📥
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KHO CUNG CẤP CÂU LỆNH SAO CHÉP CHO GEMINI -->
             <div class="bg-slate-950/90 border border-purple-900/40 rounded-2xl p-4 shadow-inner">
                 <div class="flex items-center justify-between border-b border-purple-950 pb-2 mb-2">
                     <span class="text-xs font-extrabold text-purple-400 tracking-wide uppercase flex items-center gap-1">
-                        🤖 Trợ lý bóc tách đề vạn năng qua Gemini AI
+                        🤖 Trợ lý bóc tách đề đa danh mục qua Gemini
                     </span>
                     <button type="button" id="copy-prompt-btn" class="bg-purple-950 hover:bg-purple-900 border border-purple-700 text-purple-300 font-extrabold text-[10px] sm:text-xs px-3 py-1.5 rounded-xl transition-all active:scale-90 shadow-md">
                         📋 Sao chép lệnh AI
@@ -176,6 +221,7 @@
                 </p>
             </div>
 
+            <!-- Cấu hình nâng cao -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-xs font-bold text-gray-400 uppercase mb-1 tracking-widest">Biệt danh của bạn:</label>
@@ -188,8 +234,8 @@
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-gray-400 uppercase mb-1 tracking-widest">Dán nội dung dữ liệu chữ do Gemini xuất ra vào đây:</label>
-                <textarea id="bulk-input" rows="6" class="w-full quizizz-input rounded-xl p-3 text-xs sm:text-sm font-mono focus:outline-none" placeholder="Dán nội dung đề phân tách dấu | vào đây...">Confidence Intervals | Khoảng tin cậy cho một trung bình tổng thể được sử dụng nhằm mục đích gì? | Ước lượng giá trị tham số tổng thể chưa biết | Kiểm định tính độc lập của biến | Tìm phương sai của mẫu khảo sát | Xác định độ lệch chuẩn chuẩn xác | 1
+                <label class="block text-xs font-bold text-gray-400 uppercase mb-1 tracking-widest">Dán nội dung tệp đề đa chủ đề vào đây:</label>
+                <textarea id="bulk-input" rows="5" class="w-full quizizz-input rounded-xl p-3 text-xs sm:text-sm font-mono focus:outline-none" placeholder="Dán nội dung đề phân tách dấu | vào đây...">Confidence Intervals | Khoảng tin cậy cho một trung bình tổng thể được sử dụng nhằm mục đích gì? | Ước lượng giá trị tham số tổng thể chưa biết | Kiểm định tính độc lập của biến | Tìm phương sai của mẫu khảo sát | Xác định độ lệch chuẩn chuẩn xác | 1
 Confidence Intervals | Khi kích thước mẫu tăng lên và độ tin cậy giữ nguyên, độ rộng khoảng tin cậy sẽ biến đổi như thế nào? | Tăng lên đáng kể | Thu hẹp lại | Giữ nguyên cố định | Biến thiên ngẫu nhiên | 2
 Rational Functions | Tiệm cận đứng của đồ thị hàm số phân thức y = (2x + 1) / (x - 3) là đường thẳng nào? | x = 3 | y = 2 | x = -3 | y = -3 | 1
 Rational Functions | Tiệm cận ngang của đồ thị hàm số phân thức y = (3x - 5) / (x + 2) là đường thẳng nào? | y = -2 | x = -2 | y = 3 | x = 3 | 3
@@ -210,6 +256,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
         </div>
     </div>
 
+    <!-- MÀN HÌNH CHÍNH 3: PHÒNG CHỜ ĐẤU MẠNG REALTIME LOBBY -->
     <div id="lobby-screen" class="w-full max-w-md quizizz-glass rounded-3xl p-6 text-center hidden animate__animated animate__fadeIn">
         <div class="bg-purple-950/70 border border-purple-900/50 rounded-2xl p-4 mb-6">
             <span class="text-xs text-gray-400 block uppercase font-bold tracking-widest">MÃ PHÒNG GỬI BẠN BÈ</span>
@@ -234,10 +281,13 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
         </div>
     </div>
 
+    <!-- MÀN HÌNH CHÍNH 4: TRÌNH CHIẾN ĐẤU TRẮC NGHIỆM CHÍNH (GAMEPLAY ARENA) -->
     <div id="game-screen" class="w-full max-w-5xl hidden animate__animated animate__fadeIn">
         <div class="flex flex-col lg:grid lg:grid-cols-4 gap-4 sm:gap-6">
             
+            <!-- VÙNG TƯƠNG TÁC LÀM BÀI BÊN TRÁI -->
             <div class="lg:col-span-3 quizizz-glass rounded-2xl sm:rounded-3xl p-4 sm:p-6 flex flex-col justify-between min-h-[68dvh] lg:min-h-[550px] relative overflow-hidden">
+                <!-- HUD Top Bar -->
                 <div class="flex justify-between items-center gap-2 sm:gap-4 mb-2">
                     <div class="bg-purple-950/80 px-2.5 py-1.5 rounded-xl border border-purple-900/60 text-[10px] sm:text-xs font-bold uppercase shrink-0">
                         Câu: <span id="current-question-idx" class="text-cyan-400">1/1</span>
@@ -253,18 +303,20 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
                         <button type="button" id="pause-btn" class="bg-purple-900/60 hover:bg-purple-800 border border-purple-700/60 px-2.5 py-1.5 rounded-xl text-[10px] font-black text-purple-200 transition-all active:scale-90">
                             ⏸ Tạm dừng
                         </button>
-                        <button type="button" id="btn-game-exit" class="bg-red-950/60 hover:bg-red-800 border border-red-900 px-2.5 py-1 rounded-xl text-[10px] font-black text-red-200 transition-all active:scale-90">
+                        <button type="button" id="btn-game-exit" class="bg-red-950/60 hover:bg-red-800 border border-red-900 px-2.5 py-1.5 rounded-xl text-[10px] font-black text-red-200 transition-all active:scale-90">
                             🚪 Thoát
                         </button>
                     </div>
                 </div>
 
+                <!-- Ô hiển thị câu hỏi lớn -->
                 <div class="text-center my-4 sm:my-8 min-h-[100px] flex items-center justify-center px-2">
                     <h2 id="question-text" class="text-lg sm:text-2xl lg:text-3xl font-extrabold leading-snug sm:leading-relaxed text-white drop-shadow-md animate__animated">
                         Nội dung câu hỏi?
                     </h2>
                 </div>
 
+                <!-- 4 Ô đáp án lớn sắc màu -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-auto">
                     <button type="button" id="opt-0" class="bg-[#2f6dae] p-4 sm:p-5 rounded-xl sm:rounded-2xl text-left font-extrabold text-sm sm:text-lg border-b-4 border-[#1a416b] min-h-[65px] sm:min-h-[85px] flex items-center transition-all active:scale-[0.97]">
                         <span class="bg-black/20 w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center mr-3 sm:mr-4 text-xs font-black shadow-inner shrink-0">▲</span>
@@ -284,6 +336,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
                     </button>
                 </div>
 
+                <!-- LỚP PHỦ HỆ THỐNG PHẢN HỒI LẬT TỨC (MEME OVERLAY) -->
                 <div id="meme-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-[#07020d]/90 z-50 hidden">
                     <div id="meme-box" class="quizizz-glass rounded-2xl p-6 text-center border-4 max-w-xs w-5/6 animate__animated">
                         <div id="meme-emoji" class="text-5xl sm:text-6xl mb-2">😎</div>
@@ -293,6 +346,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
                     </div>
                 </div>
 
+                <!-- LỚP PHỦ TRẠNG THÁI TẠM DỪNG (PAUSE INTERFACE) -->
                 <div id="pause-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-[#0c0414]/95 z-[60] hidden">
                     <div class="quizizz-glass rounded-2xl p-6 text-center border-4 border-purple-500 max-w-xs w-5/6 animate__animated animate__bounceIn">
                         <div class="text-5xl mb-2">⏸️</div>
@@ -310,8 +364,10 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
                 </div>
             </div>
 
+            <!-- CỘT THỐNG KÊ ĐỘNG / LEADERBOARD BÊN PHẢI -->
             <div class="quizizz-glass rounded-2xl sm:rounded-3xl p-4 flex flex-col justify-between lg:min-h-[550px]">
                 <div class="w-full">
+                    <!-- TRẠNG THÁI 1: BẢNG XẾP HẠNG MULTIPLAYER -->
                     <div id="panel-multi-title" class="hidden">
                         <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-purple-900/60 pb-2 mb-3 flex items-center justify-between">
                             <span>BẢNG XẾP HẠNG</span>
@@ -320,6 +376,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
                         <div id="leaderboard-container" class="space-y-2 max-h-40 lg:max-h-none overflow-y-auto pr-0.5"></div>
                     </div>
                     
+                    <!-- TRẠNG THÁI 2: TIẾN ĐỘ THỐNG KÊ ÔN TẬP -->
                     <div id="panel-single-title" class="hidden">
                         <h3 class="text-xs font-bold text-cyan-400 uppercase tracking-widest border-b border-cyan-900/60 pb-2 mb-3">
                             📊 THỐNG KÊ KẾT QUẢ
@@ -347,6 +404,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
                     </div>
                 </div>
 
+                <!-- Hệ thống điểm số -->
                 <div class="bg-[#1b0c30] border-2 border-purple-900/40 rounded-xl p-4 text-center mt-3 shadow-inner">
                     <div class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">ĐIỂM CỦA BẠN</div>
                     <div id="my-score-footer" class="text-4xl font-black text-yellow-400 mt-0.5">0</div>
@@ -355,6 +413,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
         </div>
     </div>
 
+    <!-- TRÌNH HỌC TẬP CHỦ ĐỘNG FLASHCARD (ACTIVE RECALL ARENA) -->
     <div id="flashcard-screen" class="w-full max-w-xl hidden animate__animated animate__fadeIn">
         <div class="quizizz-glass rounded-3xl p-5 flex flex-col justify-between min-h-[480px]">
             
@@ -367,15 +426,18 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
                 </button>
             </div>
 
+            <!-- Khối Card 3D Lật mặt -->
             <div class="flashcard-box w-full my-8 cursor-pointer flex-1 flex items-stretch">
                 <div id="flashcard-trigger-inner" class="flashcard-inner w-full relative quizizz-input rounded-2xl border-4 border-purple-900/40 p-6 flex items-center justify-center text-center shadow-2xl">
                     
+                    <!-- Mặt trước: Câu hỏi -->
                     <div class="flashcard-front absolute inset-0 p-6 flex flex-col justify-between items-center">
                         <div class="text-[10px] text-purple-400 tracking-widest font-black uppercase">❓ MẶT TRƯỚC (CÂU HỎI)</div>
                         <p id="flashcard-q-text" class="text-lg sm:text-xl font-extrabold leading-relaxed text-white max-h-[250px] overflow-y-auto hide-scrollbar">Nội dung câu hỏi?</p>
                         <div class="text-[10px] text-gray-500 animate__animated animate__flash animate__infinite">👉 Chạm vào thẻ để lật xem đáp án</div>
                     </div>
 
+                    <!-- Mặt sau: Đáp án chuẩn xác -->
                     <div class="flashcard-back absolute inset-0 p-6 flex flex-col justify-between items-center bg-emerald-950/40 border border-emerald-500/20 rounded-xl">
                         <div class="text-[10px] text-emerald-400 tracking-widest font-black uppercase">💡 MẶT SAU (ĐÁP ÁN ĐÚNG)</div>
                         <div class="w-full flex-1 flex items-center justify-center">
@@ -387,6 +449,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
                 </div>
             </div>
 
+            <!-- Cụm nút chuyển tiếp -->
             <div class="grid grid-cols-2 gap-3 mt-auto">
                 <div class="text-left flex flex-col justify-center pl-1 font-bold text-xs text-gray-400">
                     <span>Nhấp thẻ để kiểm tra</span>
@@ -400,6 +463,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
         </div>
     </div>
 
+    <!-- MÀN HÌNH 5: BẢNG TỔNG KẾT VÀ BÁO CÁO CÁC CÂU SAI ĐỂ KHẮC PHỤC -->
     <div id="result-screen" class="w-full max-w-2xl quizizz-glass rounded-3xl p-5 text-center hidden animate__animated animate__fadeIn">
         <span class="text-4xl block mb-2">🏁</span>
         <h1 class="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-amber-500 mb-4 uppercase">KẾT THÚC LƯỢT CHƠI</h1>
@@ -417,6 +481,7 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
             </div>
         </div>
 
+        <!-- BẢNG ĐIỀU TRA KHẮC PHỤC CÂU SAI ĐẮT GIÁ -->
         <div id="mistake-review-zone" class="hidden text-left my-4 sm:my-5">
             <h3 class="text-xs sm:text-sm font-black text-rose-400 uppercase tracking-wider mb-2 flex items-center gap-1">
                 ⚠️ Báo cáo lỗi sai kiến thức (Cần ôn lại):
@@ -434,12 +499,14 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
         </div>
     </div>
 
+    <!-- HỆ THỐNG ĐIỀU KHIỂN ENGINE TOÀN DIỆN JAVASCRIPT -->
     <script>
         const TIME_LIMIT_PER_QUESTION_SEC = 15;
         const SHOW_ANSWER_WINDOW_SEC = 4;
 
         let gameMode = 'single'; 
         let client = null;
+        let syncClient = null; // Client trung gian phục vụ riêng luồng đồng bộ không dây
         let roomCode = "";
         let isHost = false;
         let myName = "Người_Ôn_Tập";
@@ -559,6 +626,69 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
                     btn.classList.remove('bg-emerald-800', 'text-emerald-200');
                 }, 2500);
             }
+        }
+
+        // ========================================================
+        // PHẦN LOGIC ĐỒNG BỘ KHÔNG DÂY REALTIME ĐỘC QUYỀN
+        // ========================================================
+        function initWirelessSyncAsSender() {
+            const syncCode = Math.floor(100000 + Math.random() * 900000).toString();
+            document.getElementById('display-sync-code').innerText = syncCode;
+            document.getElementById('sync-status-text').innerText = "📡 Đang chờ điện thoại kết nối...";
+            
+            const id = "sync_sender_" + Math.random().toString(36).substring(5);
+            syncClient = new Paho.MQTT.Client("broker.hivemq.com", Number(8884), "/mqtt", id);
+            
+            syncClient.onMessageArrived = function(msg) {
+                const data = JSON.parse(msg.payloadString);
+                if (data.type === 'REQ_DATA_PACKET') {
+                    const localRaw = localStorage.getItem('wayground_raw_input') || "";
+                    const responsePacket = { type: 'PUSH_DATA_PACKET', rawText: localRaw };
+                    
+                    const m = new Paho.MQTT.Message(JSON.stringify(responsePacket));
+                    m.destinationName = "wayground_wireless_sync_channel_" + syncCode;
+                    syncClient.send(m);
+                    document.getElementById('sync-status-text').innerText = "✓ Đã chuyển đề sang điện thoại!";
+                }
+            };
+            
+            syncClient.connect({
+                useSSL: true, timeout: 5,
+                onSuccess: () => { syncClient.subscribe("wayground_wireless_sync_channel_" + syncCode); },
+                onFailure: () => { document.getElementById('sync-status-text').innerText = "❌ Lỗi kết nối mạng."; }
+            });
+        }
+
+        function initWirelessSyncAsReceiver() {
+            const codeInput = document.getElementById('input-sync-code').value.trim();
+            if (codeInput.length !== 6 || isNaN(codeInput)) { alert("Vui lòng nhập đúng mã đồng bộ 6 số xuất hiện từ laptop."); return; }
+            
+            const id = "sync_receiver_" + Math.random().toString(36).substring(5);
+            syncClient = new Paho.MQTT.Client("broker.hivemq.com", Number(8884), "/mqtt", id);
+            
+            syncClient.onMessageArrived = function(msg) {
+                const data = JSON.parse(msg.payloadString);
+                if (data.type === 'PUSH_DATA_PACKET') {
+                    document.getElementById('bulk-input').value = data.rawText;
+                    processAndLoadDatabase();
+                    alert("🎉 Đồng bộ thành công! Toàn bộ kho đề từ Laptop đã được nạp vĩnh viễn vào điện thoại của bạn.");
+                    try { syncClient.disconnect(); } catch(e){}
+                    backToDashboardHome();
+                }
+            };
+            
+            syncClient.connect({
+                useSSL: true, timeout: 5,
+                onSuccess: () => {
+                    syncClient.subscribe("wayground_wireless_sync_channel_" + codeInput);
+                    // Phát lệnh yêu cầu Laptop nhả dữ liệu
+                    const requestPacket = { type: 'REQ_DATA_PACKET' };
+                    const m = new Paho.MQTT.Message(JSON.stringify(requestPacket));
+                    m.destinationName = "wayground_wireless_sync_channel_" + codeInput;
+                    syncClient.send(m);
+                },
+                onFailure: () => { alert("Không thể kết nối tới kênh đồng bộ không dây."); }
+            });
         }
 
         // ========================================================
@@ -1174,6 +1304,9 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
                     }
                 } catch(e) { console.error("Hủy kết nối mạng gặp lỗi:", e); }
             }
+            if (syncClient) {
+                try { syncClient.disconnect(); } catch(e){}
+            }
             
             const screens = ['mode-screen', 'multi-choice-screen', 'setup-screen', 'player-join-screen', 'lobby-screen', 'game-screen', 'flashcard-screen', 'result-screen'];
             screens.forEach(id => {
@@ -1227,13 +1360,17 @@ Vectors and Spaces | Hai vector vuông góc với nhau khi và chỉ khi tích v
             document.getElementById('btn-result-reload').addEventListener('click', () => window.location.reload());
             document.getElementById('mute-btn').addEventListener('click', toggleAudioMute);
             
-            // KÍCH HOẠT SỰ KIỆN SAO CHÉP PROMPT AI CHO CẢ PC VÀ SMARTPHONE
+            // KÍCH HOẠT SỰ KIỆN COPIED SIÊU PROMPT CHO GEMINI
             document.getElementById('copy-prompt-btn').addEventListener('click', copyAiPromptToClipboard);
 
             // KÍCH HOẠT NÚT TẠM DỪNG TRẬN ĐẤU GÓC HUD GAME SCREEN
             document.getElementById('pause-btn').addEventListener('click', togglePauseGame);
 
-            // KÍCH HOẠT SỰ KIỆN CHẠM LẬT THẺ CHUẨN XÁC V6.2
+            // KÍCH HOẠT MÔ-ĐUN TRUYỀN DẪN ĐỒNG BỘ THIẾT BỊ KHÔNG DÂY MỚI
+            document.getElementById('btn-sync-send-trigger').addEventListener('click', initWirelessSyncAsSender);
+            document.getElementById('btn-sync-receive-trigger').addEventListener('click', initWirelessSyncAsReceiver);
+
+            // KÍCH HOẠT SỰ KIỆN CHẠM LẬT THÈ CHUẨN XÁC V6.2
             document.getElementById('flashcard-trigger-inner').addEventListener('click', rotateFlashcardCore);
 
             // GÁN LỆNH CHO THANH TÌM KIẾM PC VÀ MOBILE
